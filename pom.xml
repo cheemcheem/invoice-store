@@ -52,6 +52,13 @@
     <finalName>${project.artifactId}</finalName>
   </build>
 
+  <dependencies>
+    <dependency>
+      <artifactId>spring-boot-starter-oauth2-client</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+  </dependencies>
+
   <properties>
     <github.username>cheemcheem</github.username>
   </properties>

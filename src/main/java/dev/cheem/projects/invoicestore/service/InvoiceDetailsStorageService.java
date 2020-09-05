@@ -4,6 +4,7 @@ import dev.cheem.projects.invoicestore.dto.InvoiceDetailsDTO;
 import dev.cheem.projects.invoicestore.dto.InvoiceFileDTO;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
 import dev.cheem.projects.invoicestore.model.InvoiceFile;
+import dev.cheem.projects.invoicestore.model.User;
 import dev.cheem.projects.invoicestore.repository.InvoiceDetailsRepository;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -26,8 +27,11 @@ public class InvoiceDetailsStorageService {
 
   private final InvoiceDetailsRepository invoiceDetailsRepository;
 
-  public InvoiceDetails storeInvoice(Date invoiceDate, String invoiceName, BigDecimal invoiceTotalVAT, BigDecimal invoiceTotal, @Nullable InvoiceFile invoiceFile) {
+  public InvoiceDetails storeInvoice(Date invoiceDate, String invoiceName,
+      BigDecimal invoiceTotalVAT, BigDecimal invoiceTotal, @Nullable InvoiceFile invoiceFile,
+      User invoiceUser) {
     log.info("InvoiceDetailsStorageService.storeInvoice");
+
     var invoice = new InvoiceDetails();
     invoice.setInvoiceDate(invoiceDate);
     invoice.setInvoiceName(invoiceName);
@@ -35,14 +39,15 @@ public class InvoiceDetailsStorageService {
     invoice.setInvoiceTotal(invoiceTotal);
     invoice.setInvoiceFile(invoiceFile);
     invoice.setInvoiceArchived(false);
+    invoice.setInvoiceUser(invoiceUser);
 
     return invoiceDetailsRepository.save(invoice);
   }
 
   @Transactional
-  public Optional<InvoiceDetailsDTO> getInvoiceDetails(String invoiceDetailsId) {
+  public Optional<InvoiceDetailsDTO> getInvoiceDetails(String invoiceDetailsId, User invoiceUser) {
     log.info("InvoiceDetailsStorageService.getInvoiceDetails");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
+    log.debug("invoiceDetailsId = " + invoiceDetailsId + ", invoiceUser = " + invoiceUser + ", invoiceUser = " + invoiceUser);
     var invoiceDetailsIdLong = NumberUtils.parseNumber(invoiceDetailsId, Long.class);
     var optionalDetails = invoiceDetailsRepository.findById(invoiceDetailsIdLong);
 
@@ -51,6 +56,11 @@ public class InvoiceDetailsStorageService {
     }
 
     var invoiceDetails = optionalDetails.get();
+
+    if (invoiceDetails.getInvoiceUser().getUserId() != invoiceUser.getUserId()) {
+      return Optional.empty();
+    }
+
     var invoiceDetailsDTO = new InvoiceDetailsDTO();
 
     invoiceDetailsDTO.setInvoiceDetailsId(invoiceDetails.getInvoiceDetailsId());
@@ -75,24 +85,27 @@ public class InvoiceDetailsStorageService {
 
   }
 
-  public List<String> getAllInvoiceDetails() {
+  public List<String> getAllInvoiceDetails(User invoiceUser) {
     return invoiceDetailsRepository.findAll().stream()
+        .filter(i -> i.getInvoiceUser().getUserId() == invoiceUser.getUserId())
         .filter(Predicate.not(InvoiceDetails::getInvoiceArchived))
         .map(InvoiceDetails::getInvoiceDetailsId)
         .map(Objects::toString)
         .collect(Collectors.toList());
   }
-  public List<String> getArchivedInvoiceDetails() {
+
+  public List<String> getArchivedInvoiceDetails(User invoiceUser) {
     return invoiceDetailsRepository.findAll().stream()
+        .filter(i -> i.getInvoiceUser().getUserId() == invoiceUser.getUserId())
         .filter(InvoiceDetails::getInvoiceArchived)
         .map(InvoiceDetails::getInvoiceDetailsId)
         .map(Objects::toString)
         .collect(Collectors.toList());
   }
 
-  public Optional<Boolean> deleteInvoiceDetails(String invoiceDetailsId) {
+  public Optional<Boolean> deleteInvoiceDetails(String invoiceDetailsId, User invoiceUser) {
     log.info("InvoiceDetailsStorageService.deleteInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
+    log.debug("invoiceDetailsId = " + invoiceDetailsId + ", invoiceUser = " + invoiceUser);
 
     var invoiceDetailsIdLong = NumberUtils.parseNumber(invoiceDetailsId, Long.class);
     var optional = invoiceDetailsRepository.findById(invoiceDetailsIdLong);
@@ -102,6 +115,10 @@ public class InvoiceDetailsStorageService {
     }
 
     var invoiceDetails = optional.get();
+
+    if (invoiceDetails.getInvoiceUser().getUserId() != invoiceUser.getUserId()) {
+      return Optional.of(false);
+    }
 
     if (!invoiceDetails.getInvoiceArchived()) {
       return Optional.of(false);
@@ -112,26 +129,33 @@ public class InvoiceDetailsStorageService {
 
   }
 
-  public Optional<InvoiceDetails> archiveInvoice(String invoiceDetailsId) {
-    return changeArchiveStatus(invoiceDetailsId, true);
+  public Optional<InvoiceDetails> archiveInvoice(String invoiceDetailsId, User invoiceUser) {
+    return changeArchiveStatus(invoiceDetailsId, true, invoiceUser);
   }
 
-  public Optional<InvoiceDetails> restoreInvoice(String invoiceDetailsId) {
-    return changeArchiveStatus(invoiceDetailsId, false);
+  public Optional<InvoiceDetails> restoreInvoice(String invoiceDetailsId, User invoiceUser) {
+    return changeArchiveStatus(invoiceDetailsId, false, invoiceUser);
   }
 
-  private Optional<InvoiceDetails> changeArchiveStatus(String invoiceDetailsId, boolean invoiceArchived) {
+  private Optional<InvoiceDetails> changeArchiveStatus(String invoiceDetailsId,
+      boolean invoiceArchived, User invoiceUser) {
     log.info("InvoiceDetailsStorageService.changeArchiveStatus");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId + ", invoiceArchived = " + invoiceArchived);
+    log.debug("invoiceDetailsId = " + invoiceDetailsId + ", invoiceArchived = " + invoiceArchived
+        + ", invoiceUser = " + invoiceUser);
 
     var invoiceDetailsIdLong = NumberUtils.parseNumber(invoiceDetailsId, Long.class);
-    var optional = invoiceDetailsRepository.findById(invoiceDetailsIdLong);
+    var optionalDetails = invoiceDetailsRepository.findById(invoiceDetailsIdLong);
 
-    if (optional.isEmpty()) {
+    if (optionalDetails.isEmpty()) {
       return Optional.empty();
     }
 
-    var invoiceDetails = optional.get();
+    var invoiceDetails = optionalDetails.get();
+
+    if (invoiceDetails.getInvoiceUser().getUserId() != invoiceUser.getUserId()) {
+      return Optional.empty();
+    }
+
     invoiceDetails.setInvoiceArchived(invoiceArchived);
 
     return Optional.of(invoiceDetailsRepository.save(invoiceDetails));

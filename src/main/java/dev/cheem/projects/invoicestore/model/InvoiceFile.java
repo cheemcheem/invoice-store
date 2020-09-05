@@ -5,8 +5,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.OneToOne;
 import lombok.Data;
+import lombok.ToString;
 
+@ToString(exclude = {"data"})
 @Data
 @Entity
 public class InvoiceFile {

@@ -31,7 +31,10 @@ export default function ViewInvoicePage() {
 
     fetch(`/api/invoice/file/${invoice.invoiceFile.invoiceFileId}`)
     .then(response => response.blob())
-    .then(download);
+    .then(blob => {
+      console.log({blob,invoice})
+      download(blob,invoice.invoiceFile?.invoiceFileName, invoice.invoiceFile?.invoiceFileType)
+    });
 
   }, [invoice.invoiceFile])
 

@@ -2,10 +2,13 @@ package dev.cheem.projects.invoicestore.service;
 
 import dev.cheem.projects.invoicestore.exception.StorageException;
 import dev.cheem.projects.invoicestore.model.InvoiceFile;
+import dev.cheem.projects.invoicestore.model.User;
+import dev.cheem.projects.invoicestore.repository.InvoiceDetailsRepository;
 import dev.cheem.projects.invoicestore.repository.InvoiceFileRepository;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
@@ -52,26 +55,23 @@ public class InvoiceFileStorageService {
 
   }
 
+  @Transactional
   public Optional<InvoiceFile> getFile(String invoiceFileId) {
     log.info("InvoiceFileStorageService.getFile");
-    log.debug("invoiceFileId = " + invoiceFileId);
-    var invoiceFileIdLong = NumberUtils.parseNumber(invoiceFileId, Long.class);
-    return invoiceFileRepository.findById(invoiceFileIdLong);
-  }
+    log.debug("invoiceFileId = " + invoiceFileId );
 
-  public Optional<Boolean> deleteInvoiceFile(String invoiceFileId) {
-    log.info("InvoiceFileStorageService.deleteInvoiceFile");
-    log.debug("invoiceFileId = " + invoiceFileId);
     var invoiceFileIdLong = NumberUtils.parseNumber(invoiceFileId, Long.class);
-    var optional = invoiceFileRepository.findById(invoiceFileIdLong);
+    var optionalInvoiceFile = invoiceFileRepository.findById(invoiceFileIdLong);
 
-    if (optional.isEmpty()) {
+    if (optionalInvoiceFile.isEmpty()) {
       return Optional.empty();
     }
 
-    var invoiceFile = optional.get();
-    invoiceFileRepository.delete(invoiceFile);
+    var invoiceFile = optionalInvoiceFile.get();
+    log.debug("invoiceFile = {}", invoiceFile);
 
-    return Optional.of(true);
+    return optionalInvoiceFile;
   }
+
+
 }
