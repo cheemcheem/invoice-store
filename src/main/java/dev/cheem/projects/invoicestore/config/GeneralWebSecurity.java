@@ -7,15 +7,13 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SimpleSavedRequest;
 
-@Order(1)
 @Configuration
 @Slf4j
 public class GeneralWebSecurity extends WebSecurityConfigurerAdapter {
@@ -30,7 +28,9 @@ public class GeneralWebSecurity extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/user").permitAll()
             .anyRequest().authenticated()
         )
-        .csrf(AbstractHttpConfigurer::disable)
+        .csrf(c -> c
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        )
         .logout(l -> l
             .logoutUrl("/logout")
             .logoutSuccessHandler((request, response, authentication) -> {
@@ -41,18 +41,17 @@ public class GeneralWebSecurity extends WebSecurityConfigurerAdapter {
                 response.sendRedirect("http://" + uri.getHost() + ":" + uri.getPort());
               }
             })
-//            .permitAll()
         )
         .oauth2Login(
             o -> o
-            .successHandler((request, response, authentication) -> {
-              var referrer = request.getHeader("referer");
-              log.info("referrer '{}' ", referrer);
-              if (Objects.nonNull(referrer)) {
-                var uri = URI.create(referrer);
-                response.sendRedirect("http://" + uri.getHost() + ":" + uri.getPort());
-              }
-            })
+                .successHandler((request, response, authentication) -> {
+                  var referrer = request.getHeader("referer");
+                  log.info("referrer '{}' ", referrer);
+                  if (Objects.nonNull(referrer)) {
+                    var uri = URI.create(referrer);
+                    response.sendRedirect("http://" + uri.getHost() + ":" + uri.getPort());
+                  }
+                })
         )
     ;
   }

@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {Invoice} from "../common/Types";
 import download from "downloadjs";
+import * as Cookie from "js-cookie";
 
 export default function ViewInvoicePage() {
   const {invoiceId} = useParams();
@@ -15,12 +16,18 @@ export default function ViewInvoicePage() {
   }, [setInvoice, invoiceId]);
 
   const archiveButton = useCallback(
-      () => fetch(`/api/invoice/${invoice.invoiceArchived ? "restore" : "archive"}/${invoice.invoiceDetailsId}`, {method: "PUT"})
+      () => fetch(`/api/invoice/${invoice.invoiceArchived ? "restore" : "archive"}/${invoice.invoiceDetailsId}`, {
+        method: "PUT",
+        headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
+      })
       .then(() => window.location.reload()),
       [invoice.invoiceArchived, invoice.invoiceDetailsId])
 
   const deleteButton = useCallback(
-      () => fetch(`/api/invoice/delete/${invoice.invoiceDetailsId}`, {method: "DELETE"})
+      () => fetch(`/api/invoice/delete/${invoice.invoiceDetailsId}`, {
+        method: "DELETE",
+        headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
+      })
       .then(() => window.location.pathname = "/all")
       , [invoice.invoiceDetailsId])
 

@@ -1,19 +1,19 @@
-import React, {useMemo} from "react";
+import React, {useCallback} from "react";
 import {BrowserRouter, NavLink, Route, Switch} from "react-router-dom";
 import ViewAllInvoices from "./ViewAllInvoices";
 import NewInvoicePage from "./NewInvoicePage";
 import ViewInvoicePage from "./ViewInvoicePage";
+import * as Cookie from "js-cookie";
 
 export default function MainPage() {
-  const logout = useMemo(() => {
-    let port = (window.location.port ? ':' + window.location.port : '');
-    // handle localhost dev case
-    if (port === ':3000') {
-      port = ':8080';
-    }
-    return window.location.protocol + '//' + window.location.hostname + port + '/logout';
-  }, []);
 
+  const logout = useCallback(
+      () => fetch(`/logout`, {
+        method: "POST",
+        headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
+      })
+      .then(() => window.location.pathname = "/")
+      , [])
   return <>
     <BrowserRouter forceRefresh>
       <nav>
@@ -21,7 +21,9 @@ export default function MainPage() {
           <li><NavLink to="/all">All Invoices</NavLink></li>
           <li><NavLink to="/archived">Archive</NavLink></li>
           <li><NavLink to="/new">New Invoice</NavLink></li>
-          <li><a href={logout}>Logout</a></li>
+          <li>
+            <button onClick={logout}>Logout</button>
+          </li>
         </ul>
       </nav>
 
@@ -30,7 +32,6 @@ export default function MainPage() {
         <Route path="/archived"><ViewAllInvoices archived/></Route>
         <Route path="/new"><NewInvoicePage/></Route>
         <Route path="/view/:invoiceId"><ViewInvoicePage/></Route>
-        <Route path="/logout"></Route>
       </Switch>
     </BrowserRouter>
   </>

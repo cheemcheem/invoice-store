@@ -1,6 +1,7 @@
 import React from "react";
 import FormInput from "./subcomponents/FormInput";
 import "./NewInvoicePage.css";
+import * as Cookie from "js-cookie";
 
 export default function NewInvoicePage() {
 return <>
@@ -11,6 +12,7 @@ return <>
     <FormInput formInputId="invoiceTotal" formInputType="number" formInputLabelText="Total"/>
     <label htmlFor="invoiceFile">Optionally attach file</label>
     <input id="invoiceFile"  name="invoiceFile" type="file" accept="image/*,.pdf"/>
+    <input type="hidden" name="_csrf" value={String(Cookie.get("XSRF-TOKEN"))}/>
     <input id="invoiceSubmit" type="submit" value="Create" required/>
   </form>
 </>
