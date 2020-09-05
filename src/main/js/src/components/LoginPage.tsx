@@ -7,13 +7,14 @@ export default function LoginPage() {
     if (port === ':3000') {
       port = ':8080';
     }
-    return window.location.protocol + '//' + window.location.hostname + port + '/api/private';
+    return window.location.protocol + '//' + window.location.hostname + port + '/oauth2/authorization/google';
   }, []);
 
   return <div id="login-container" className={"content-rounded-border-box content"}>
     <h1>Please log in to continue</h1>
     <a href={href} className="content-rounded-border-box content-inner">
-      <span>Log in with GitHub (OAuth2)</span>
+      <span>Log in with Google (OAuth2)</span>
     </a>
-  </div>;
+  </div>
+      ;
 }

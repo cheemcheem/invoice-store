@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 
-export default function ViewAllInvoices({archived}: {archived: boolean}) {
+export default function ViewAllInvoices({archived}: {archived?: boolean}) {
   const [allInvoices, setAllInvoices] = useState([] as string[]);
   console.log({allInvoices})
   useEffect(() => {

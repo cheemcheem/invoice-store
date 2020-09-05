@@ -6,15 +6,15 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Profile("local")
+@Profile("oauth")
 @RequiredArgsConstructor
 @Configuration
-public class AuthInterceptorConfiguration implements WebMvcConfigurer {
+public class OAuthInterceptorConfig implements WebMvcConfigurer {
 
-  private final AuthInterceptor authInterceptor;
+  private final OAuthInterceptor OAuthInterceptor;
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(authInterceptor);
+    registry.addInterceptor(OAuthInterceptor);
   }
 
 }

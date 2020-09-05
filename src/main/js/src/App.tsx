@@ -1,29 +1,29 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
-import {BrowserRouter as Router, NavLink, Route, Switch} from "react-router-dom";
+import MainPage from "./components/MainPage";
 import LoginPage from "./components/LoginPage";
-import NewInvoicePage from "./components/NewInvoicePage";
-import ViewInvoicePage from "./components/ViewInvoicePage";
-import ViewAllInvoices from "./components/ViewAllInvoices";
 
 export default function App() {
 
-  return <Router>
-    <nav>
-      <ul className="nav">
-        <li><NavLink to="/login">Login</NavLink></li>
-        <li><NavLink to="/all">All Invoices</NavLink></li>
-        <li><NavLink to="/archived">Archive</NavLink></li>
-        <li><NavLink to="/new">New Invoice</NavLink></li>
-      </ul>
-    </nav>
+  const [loggedIn, setIsLoggedIn] = useState(false);
 
-    <Switch>
-      <Route path="/login"><LoginPage/></Route>
-      <Route path="/all"><ViewAllInvoices archived={false}/></Route>
-      <Route path="/archived"><ViewAllInvoices archived={true}/></Route>
-      <Route path="/new"><NewInvoicePage/></Route>
-      <Route path="/view/:invoiceId"><ViewInvoicePage/></Route>
-    </Switch>
-  </Router>
+  useEffect(() => {
+    fetch("/api/user")
+    .then(response => {
+      if (response.redirected) {
+        return setIsLoggedIn(false);
+      }
+      if (response.headers.has('Content-Length')
+          && Number(response.headers.get('Content-Length')) === 0) {
+        return setIsLoggedIn(false);
+      }
+
+      return setIsLoggedIn(true);
+
+      // setIsLoggedIn(!response.redirected);
+    })
+    .catch(() => setIsLoggedIn(false))
+  }, [setIsLoggedIn]);
+
+  return loggedIn ? <MainPage/> : <LoginPage/>;
 }
