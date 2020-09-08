@@ -30,7 +30,7 @@ public class User {
   @Column(unique = true)
   private String oAuth2Id;
 
-  @OneToMany(mappedBy = "invoiceUser", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "invoiceUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private Set<InvoiceDetails> invoiceDetailsSet;
 
 

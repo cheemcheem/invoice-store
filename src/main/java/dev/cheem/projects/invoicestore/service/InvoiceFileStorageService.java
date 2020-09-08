@@ -11,6 +11,9 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.jdbc.BlobProxy;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.NumberUtils;
@@ -24,10 +27,11 @@ public class InvoiceFileStorageService {
 
   private final InvoiceFileRepository invoiceFileRepository;
 
+
   @Nullable
-  public InvoiceFile storeFile(MultipartFile file) {
+  public Long storeFile(MultipartFile file) {
     log.info("InvoiceFileStorageService.storeFile");
-    if (file.isEmpty()) {
+    if (Objects.isNull(file) || file.isEmpty()) {
       return null;
     }
 
@@ -46,12 +50,12 @@ public class InvoiceFileStorageService {
     invoiceFile.setFileType(file.getContentType());
 
     try {
-      invoiceFile.setData(file.getBytes());
+      invoiceFile.setData(BlobProxy.generateProxy(file.getBytes()));
     } catch (IOException e) {
       throw new StorageException("Failed to get data from uploaded file.", e);
     }
 
-    return invoiceFileRepository.save(invoiceFile);
+    return invoiceFileRepository.save(invoiceFile).getInvoiceFileId();
 
   }
 
@@ -71,6 +75,10 @@ public class InvoiceFileStorageService {
     log.debug("invoiceFile = {}", invoiceFile);
 
     return optionalInvoiceFile;
+  }
+
+  public InvoiceFile getDefiniteFile(String invoiceFileId) {
+    return getFile(invoiceFileId).get();
   }
 
 

@@ -2,10 +2,11 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import MainPage from "./components/MainPage";
 import LoginPage from "./components/LoginPage";
+import {AppBar, Box} from "@material-ui/core";
 
 export default function App() {
 
-  const [loggedIn, setIsLoggedIn] = useState(false);
+  const [loggedIn, setIsLoggedIn] = useState("not checked" as "not checked" | boolean);
 
   useEffect(() => {
     fetch("/api/user")
@@ -25,5 +26,9 @@ export default function App() {
     .catch(() => setIsLoggedIn(false))
   }, [setIsLoggedIn]);
 
-  return loggedIn ? <MainPage/> : <LoginPage/>;
+  return <Box>{
+    loggedIn === "not checked"
+        ? <AppBar/>
+        : loggedIn ? <MainPage/> : <LoginPage/>
+  }</Box>;
 }

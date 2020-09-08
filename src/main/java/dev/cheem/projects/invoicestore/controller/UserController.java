@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,12 @@ public class UserController {
 
   @GetMapping
   public ResponseEntity<UserDTO> user(@AuthenticationPrincipal OAuth2User principal) {
-    return ResponseEntity.ok(userService.getUser(principal.getName()));
+    log.info("UserController.user");
+    log.debug("principal = " + principal);
+    if (Objects.isNull(principal)) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(userService.login(principal.getName()));
   }
 
   @PostMapping
@@ -33,8 +39,10 @@ public class UserController {
       @AuthenticationPrincipal OAuth2User principal,
       HttpServletRequest request
   ) {
-
+    log.info("UserController.login");
+    log.debug("principal = " + principal + ", request = " + request);
     var login = userService.login(principal.getName());
+    log.debug("login '{}' ", login);
     request.getSession().setAttribute(Constants.USER_ID_SESSION_KEY, login.getUserId());
     return ResponseEntity.ok(login);
   }

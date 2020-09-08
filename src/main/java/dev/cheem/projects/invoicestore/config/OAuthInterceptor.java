@@ -26,7 +26,7 @@ public class OAuthInterceptor implements HandlerInterceptor {
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-    log.debug("AuthInterceptor.preHandle");
+    log.debug("OAuthInterceptor.preHandle");
     log.debug(request.getServletPath());
 
     if (DO_NOT_INTERCEPT.test(request.getServletPath())) {
@@ -63,9 +63,9 @@ public class OAuthInterceptor implements HandlerInterceptor {
     );
 
     log.debug("Looking for user {}.", userId);
-    var optionalUser = userRepository.findById(userId);
+    var optionalUser = userService.checkUser(userId);
     if (optionalUser.isEmpty()) {
-      log.debug("Failed to get default user.");
+      log.debug("Failed to get user.");
       return false;
     }
 

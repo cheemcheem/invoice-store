@@ -6,13 +6,16 @@ import dev.cheem.projects.invoicestore.model.InvoiceFile;
 import dev.cheem.projects.invoicestore.model.User;
 import dev.cheem.projects.invoicestore.service.InvoiceDetailsStorageService;
 import dev.cheem.projects.invoicestore.service.InvoiceFileStorageService;
+import dev.cheem.projects.invoicestore.service.UserService;
 import dev.cheem.projects.invoicestore.util.Constants;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -41,6 +44,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequiredArgsConstructor
 public class InvoiceController {
 
+  private final UserService userService;
   private final InvoiceFileStorageService invoiceFileStorageService;
   private final InvoiceDetailsStorageService invoiceDetailsStorageService;
 
@@ -51,14 +55,14 @@ public class InvoiceController {
       @RequestParam("invoiceTotalVAT") BigDecimal invoiceTotalVAT,
       @RequestParam("invoiceTotal") BigDecimal invoiceTotal,
       @RequestParam(name = "invoiceFile", required = false) MultipartFile invoiceFile,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User invoiceUser
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
 
     log.info("InvoiceUploadController.uploadInvoice");
-    var storedInvoiceFile = invoiceFileStorageService.storeFile(invoiceFile);
+    var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
     var storedInvoice = invoiceDetailsStorageService
-        .storeInvoice(invoiceDate, invoiceName, invoiceTotal, invoiceTotalVAT, storedInvoiceFile,
-            invoiceUser);
+        .storeInvoice(invoiceDate, invoiceName, invoiceTotal, invoiceTotalVAT, storedInvoiceFileId,
+            invoiceUserId);
     var invoiceLocationURI = ServletUriComponentsBuilder.fromPath("/view/")
         .path(storedInvoice.getInvoiceDetailsId().toString())
         .build().toUri();
@@ -70,30 +74,28 @@ public class InvoiceController {
   @GetMapping("/details/{invoiceDetailsId}")
   public ResponseEntity<InvoiceDetailsDTO> getInvoice(
       @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User invoiceUser
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceUploadController.getInvoice");
     log.debug("invoiceDetailsId = " + invoiceDetailsId);
-    var optional = invoiceDetailsStorageService.getInvoiceDetails(invoiceDetailsId, invoiceUser);
+    var optional = invoiceDetailsStorageService.getInvoiceDetails(invoiceDetailsId, invoiceUserId);
 
     return ResponseEntity.of(optional);
 
   }
 
+  @Transactional
+  @SneakyThrows
   @GetMapping("/file/{invoiceFileId}")
   public ResponseEntity<Resource> getInvoiceFile(
       @PathVariable String invoiceFileId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User invoiceUser
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceUploadController.getInvoiceFile");
     log.debug("invoiceFileId = " + invoiceFileId);
     var invoiceFileIdLong = NumberUtils.parseNumber(invoiceFileId, Long.class);
 
-    var invoiceForUser = invoiceUser.getInvoiceDetailsSet().stream()
-        .map(InvoiceDetails::getInvoiceFile)
-        .filter(Objects::nonNull)
-        .map(InvoiceFile::getInvoiceFileId)
-        .anyMatch(invoiceFileIdLong::equals);
+    var invoiceForUser = userService.fileMatches(invoiceUserId, invoiceFileIdLong);
 
     if (!invoiceForUser) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -111,34 +113,34 @@ public class InvoiceController {
         .contentType(MediaType.parseMediaType(invoice.getFileType()))
         .header(HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + invoice.getFileName() + "\"")
-        .body(new ByteArrayResource(invoice.getData()));
+        .body(new ByteArrayResource(invoice.getData().getBytes(1, (int) invoice.getData().length())));
   }
 
   @GetMapping("/all")
   public ResponseEntity<List<String>> getInvoiceList(
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User invoiceUser
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceUploadController.getInvoiceList");
-    return ResponseEntity.ok(invoiceDetailsStorageService.getAllInvoiceDetails(invoiceUser));
+    return ResponseEntity.ok(invoiceDetailsStorageService.getAllInvoiceDetails(invoiceUserId));
   }
 
   @GetMapping("/archived")
   public ResponseEntity<List<String>> getArchivedInvoiceList(
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User invoiceUser
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceUploadController.getArchivedInvoiceList");
-    return ResponseEntity.ok(invoiceDetailsStorageService.getArchivedInvoiceDetails(invoiceUser));
+    return ResponseEntity.ok(invoiceDetailsStorageService.getArchivedInvoiceDetails(invoiceUserId));
   }
 
   @PutMapping("/archive/{invoiceDetailsId}")
   public ResponseEntity<String> archiveInvoice(
       @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User invoiceUser
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceController.archiveInvoice");
     log.debug("invoiceDetailsId = " + invoiceDetailsId);
 
-    var optional = invoiceDetailsStorageService.archiveInvoice(invoiceDetailsId, invoiceUser);
+    var optional = invoiceDetailsStorageService.archiveInvoice(invoiceDetailsId, invoiceUserId);
 
     if (optional.isEmpty()) {
       return ResponseEntity.notFound().build();
@@ -151,12 +153,12 @@ public class InvoiceController {
   @PutMapping("/restore/{invoiceDetailsId}")
   public ResponseEntity<String> restoreInvoice(
       @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User invoiceUser
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceController.restoreInvoice");
     log.debug("invoiceDetailsId = " + invoiceDetailsId);
 
-    var optional = invoiceDetailsStorageService.restoreInvoice(invoiceDetailsId, invoiceUser);
+    var optional = invoiceDetailsStorageService.restoreInvoice(invoiceDetailsId, invoiceUserId);
 
     if (optional.isEmpty()) {
       return ResponseEntity.notFound().build();
@@ -169,13 +171,13 @@ public class InvoiceController {
   @DeleteMapping("/delete/{invoiceDetailsId}")
   public ResponseEntity<String> deleteInvoice(
       @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User invoiceUser
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceController.deleteInvoice");
     log.debug("invoiceDetailsId = " + invoiceDetailsId);
 
     var optionalDeleted = invoiceDetailsStorageService
-        .deleteInvoiceDetails(invoiceDetailsId, invoiceUser);
+        .deleteInvoiceDetails(invoiceDetailsId, invoiceUserId);
 
     if (optionalDeleted.isEmpty()) {
       return ResponseEntity.notFound().build();

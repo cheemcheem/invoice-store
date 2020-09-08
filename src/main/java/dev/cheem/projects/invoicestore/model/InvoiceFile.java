@@ -1,11 +1,15 @@
 package dev.cheem.projects.invoicestore.model;
 
+import static javax.persistence.FetchType.LAZY;
+
+import java.sql.Blob;
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.OneToOne;
 import lombok.Data;
 import lombok.ToString;
 
@@ -23,6 +27,8 @@ public class InvoiceFile {
   private String fileType;
 
   @Lob
-  private byte[] data;
+//  @Column(columnDefinition = "BLOB")
+  @Basic(fetch=LAZY)
+  private Blob data;
 
 }

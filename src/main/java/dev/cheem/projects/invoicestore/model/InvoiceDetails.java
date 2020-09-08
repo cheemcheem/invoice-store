@@ -2,6 +2,7 @@ package dev.cheem.projects.invoicestore.model;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -35,13 +36,13 @@ public class InvoiceDetails {
 
   private BigDecimal invoiceTotalVAT;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @Nullable
   private InvoiceFile invoiceFile;
 
   private Boolean invoiceArchived;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
   @JoinColumn(name = "user_id", nullable = false)
   private User invoiceUser;
 

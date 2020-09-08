@@ -11,7 +11,6 @@ public class Constants {
    * A list of endpoints that are required to be attached to request attributes.
    */
   public static final Predicate<String> DO_NOT_INTERCEPT = Pattern.compile(
-      "(/api/user(/.*)*)"
-          + "|(/api/invoice(/.*)*)"
-  ).asMatchPredicate().negate();
+      "(/api/user)"
+  ).asMatchPredicate();
 }
