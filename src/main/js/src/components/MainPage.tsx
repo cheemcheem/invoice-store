@@ -4,28 +4,27 @@ import ViewAllInvoices from "./ViewAllInvoices";
 import NewInvoicePage from "./NewInvoicePage";
 import ViewInvoicePage from "./ViewInvoicePage";
 import * as Cookie from "js-cookie";
-import {
-  AppBar,
-  createStyles,
-  Divider,
-  Fab,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  SwipeableDrawer,
-  Theme,
-  Toolbar,
-  Typography
-} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
+import {Theme} from "@material-ui/core/styles";
+import {createStyles} from "@material-ui/core/styles";
 import MenuIcon from '@material-ui/icons/Menu';
 import AddIcon from '@material-ui/icons/Add';
 import ArchiveIcon from '@material-ui/icons/Archive';
 import DescriptionIcon from '@material-ui/icons/Description';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import useRedirect from "../hooks/useRedirect";
+import {ListItem} from "@material-ui/core";
+import {ListItemIcon} from "@material-ui/core";
+import {ListItemText} from "@material-ui/core";
+import {Fab} from "@material-ui/core";
+import {SwipeableDrawer} from "@material-ui/core";
+import {IconButton} from "@material-ui/core";
+import {Toolbar} from "@material-ui/core";
+import {AppBar} from "@material-ui/core";
+import {List} from "@material-ui/core";
+import {Divider} from "@material-ui/core";
+import {Typography} from "@material-ui/core";
+import {useSnackbar} from "notistack";
 
 interface ListItemLinkProps {
   icon?: React.ReactElement;
@@ -35,17 +34,17 @@ interface ListItemLinkProps {
 
 function ListItemLink(props: ListItemLinkProps) {
   const {icon, primary, to} = props;
-  const {component, triggerRedirect} = useRedirect(to);
+  const {component, triggerRedirect} = useRedirect();
 
   const renderLink = React.useMemo(
       () =>
           React.forwardRef<any, Omit<NavLinkProps, 'to'>>((itemProps, ref) => (
               <>
-                <NavLink onClick={triggerRedirect} to={to} ref={ref} {...itemProps} />
+                <NavLink onClick={() => triggerRedirect(to)} to={to} ref={ref} {...itemProps} />
                 {component}
               </>
           )),
-      [to],
+      [to, component, triggerRedirect],
   );
 
   return (
@@ -94,12 +93,12 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function AddCreate(props: React.PropsWithChildren<any>) {
   const classes = useStyles();
-  const {component, triggerRedirect} = useRedirect("/new");
+  const {component, triggerRedirect} = useRedirect();
   return <>
     {props.children}
     <Fab variant="extended" size="medium" aria-label={"Create"} className={classes.fab}
          color={"secondary"}
-         onClick={triggerRedirect}>
+         onClick={() => triggerRedirect("/new")}>
       <AddIcon/>
       Create
     </Fab>
@@ -108,14 +107,22 @@ function AddCreate(props: React.PropsWithChildren<any>) {
 }
 
 export default function MainPage() {
+  const {enqueueSnackbar} = useSnackbar();
+  const {component, triggerRedirect} = useRedirect();
 
   const logout = useCallback(
       () => fetch(`/logout`, {
         method: "POST",
         headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
       })
-      .then(() => window.location.pathname = "/")
-      , []);
+      .then(() => {
+        enqueueSnackbar("Logged out.", {variant: "info"});
+        triggerRedirect("/");
+      })
+      .catch(() => {
+        enqueueSnackbar("Failed to log out.", {variant: "error"});
+      })
+      , [enqueueSnackbar, triggerRedirect]);
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = useCallback(() => setMenuOpen(!menuOpen), [menuOpen, setMenuOpen]);
   const classes = useStyles();
@@ -175,5 +182,6 @@ export default function MainPage() {
         <Route path="/"><Redirect to={"/all"}/></Route>
       </Switch>
     </BrowserRouter>
+    {component}
   </div>
 }

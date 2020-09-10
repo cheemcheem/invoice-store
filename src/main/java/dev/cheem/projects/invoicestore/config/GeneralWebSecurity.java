@@ -20,6 +20,7 @@ public class GeneralWebSecurity extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
+    //noinspection SpellCheckingInspection
     http
         .authorizeRequests(a -> a
             .antMatchers("/**/*.{js,html,css,ico,png,webmanifest,svg,xml}").permitAll()

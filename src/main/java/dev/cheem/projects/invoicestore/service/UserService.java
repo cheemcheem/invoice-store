@@ -11,7 +11,6 @@ import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,17 +45,13 @@ public class UserService {
     return Optional.of(userId);
 
   }
+
   @Transactional
   public User getUser(Long userId) {
     log.info("UserService.getUser");
     log.debug("userId = " + userId);
     var user = userRepository.findById(userId);
     return user.orElseThrow();
-  }
-
-  @Transactional
-  public UserDTO getUserDTO(String name) {
-    return UserDTO.builder().userId(name).build();
   }
 
 

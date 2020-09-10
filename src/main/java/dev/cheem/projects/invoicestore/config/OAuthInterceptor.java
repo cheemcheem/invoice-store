@@ -2,7 +2,6 @@ package dev.cheem.projects.invoicestore.config;
 
 import static dev.cheem.projects.invoicestore.util.Constants.DO_NOT_INTERCEPT;
 
-import dev.cheem.projects.invoicestore.repository.UserRepository;
 import dev.cheem.projects.invoicestore.service.UserService;
 import dev.cheem.projects.invoicestore.util.Constants;
 import java.util.Objects;
@@ -21,11 +20,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Slf4j
 public class OAuthInterceptor implements HandlerInterceptor {
 
-  private final UserRepository userRepository;
   private final UserService userService;
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+  public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+      Object handler) {
     log.debug("OAuthInterceptor.preHandle");
     log.debug(request.getServletPath());
 

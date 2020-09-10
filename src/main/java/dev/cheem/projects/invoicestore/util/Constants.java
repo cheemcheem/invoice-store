@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class Constants {
+
   public static final String USER_ID_ATTRIBUTE_KEY = "USER_ID_ATTRIBUTE_KEY";
   public static final String USER_ID_SESSION_KEY = "USER_ID_SESSION_KEY";
 

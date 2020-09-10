@@ -12,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class OAuthInterceptorConfig implements WebMvcConfigurer {
 
   private final OAuthInterceptor OAuthInterceptor;
+
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(OAuthInterceptor);

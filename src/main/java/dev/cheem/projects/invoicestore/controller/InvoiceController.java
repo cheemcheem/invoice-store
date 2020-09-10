@@ -1,9 +1,7 @@
 package dev.cheem.projects.invoicestore.controller;
 
+import dev.cheem.projects.invoicestore.dto.BasicInvoiceDetailsDTO;
 import dev.cheem.projects.invoicestore.dto.InvoiceDetailsDTO;
-import dev.cheem.projects.invoicestore.model.InvoiceDetails;
-import dev.cheem.projects.invoicestore.model.InvoiceFile;
-import dev.cheem.projects.invoicestore.model.User;
 import dev.cheem.projects.invoicestore.service.InvoiceDetailsStorageService;
 import dev.cheem.projects.invoicestore.service.InvoiceFileStorageService;
 import dev.cheem.projects.invoicestore.service.UserService;
@@ -11,7 +9,6 @@ import dev.cheem.projects.invoicestore.util.Constants;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -113,11 +110,12 @@ public class InvoiceController {
         .contentType(MediaType.parseMediaType(invoice.getFileType()))
         .header(HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + invoice.getFileName() + "\"")
-        .body(new ByteArrayResource(invoice.getData().getBytes(1, (int) invoice.getData().length())));
+        .body(
+            new ByteArrayResource(invoice.getData().getBytes(1, (int) invoice.getData().length())));
   }
 
   @GetMapping("/all")
-  public ResponseEntity<List<String>> getInvoiceList(
+  public ResponseEntity<List<BasicInvoiceDetailsDTO>> getInvoiceList(
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceUploadController.getInvoiceList");
@@ -125,7 +123,7 @@ public class InvoiceController {
   }
 
   @GetMapping("/archived")
-  public ResponseEntity<List<String>> getArchivedInvoiceList(
+  public ResponseEntity<List<BasicInvoiceDetailsDTO>> getArchivedInvoiceList(
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceUploadController.getArchivedInvoiceList");
@@ -142,7 +140,7 @@ public class InvoiceController {
 
     var optional = invoiceDetailsStorageService.archiveInvoice(invoiceDetailsId, invoiceUserId);
 
-    if (optional.isEmpty()) {
+    if (!optional) {
       return ResponseEntity.notFound().build();
     }
 
@@ -160,7 +158,7 @@ public class InvoiceController {
 
     var optional = invoiceDetailsStorageService.restoreInvoice(invoiceDetailsId, invoiceUserId);
 
-    if (optional.isEmpty()) {
+    if (!optional) {
       return ResponseEntity.notFound().build();
     }
 

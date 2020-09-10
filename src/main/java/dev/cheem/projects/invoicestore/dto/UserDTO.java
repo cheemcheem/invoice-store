@@ -6,5 +6,6 @@ import lombok.Data;
 @Builder
 @Data
 public class UserDTO {
+
   private final String userId;
 }

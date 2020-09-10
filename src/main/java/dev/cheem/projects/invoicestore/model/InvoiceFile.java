@@ -20,15 +20,17 @@ public class InvoiceFile {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(nullable = false)
   private Long invoiceFileId;
 
+  @Column(nullable = false)
   private String fileName;
 
+  @Column(nullable = false)
   private String fileType;
 
   @Lob
-//  @Column(columnDefinition = "BLOB")
-  @Basic(fetch=LAZY)
+  @Basic(fetch = LAZY)
   private Blob data;
 
 }

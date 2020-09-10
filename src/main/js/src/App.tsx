@@ -2,10 +2,11 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import MainPage from "./components/MainPage";
 import LoginPage from "./components/LoginPage";
-import {AppBar, Box} from "@material-ui/core";
+import {AppBar} from "@material-ui/core";
+import {Box} from "@material-ui/core";
+import {SnackbarProvider} from 'notistack';
 
 export default function App() {
-
   const [loggedIn, setIsLoggedIn] = useState("not checked" as "not checked" | boolean);
 
   useEffect(() => {
@@ -21,14 +22,15 @@ export default function App() {
 
       return setIsLoggedIn(true);
 
-      // setIsLoggedIn(!response.redirected);
     })
     .catch(() => setIsLoggedIn(false))
   }, [setIsLoggedIn]);
 
-  return <Box>{
-    loggedIn === "not checked"
-        ? <AppBar/>
-        : loggedIn ? <MainPage/> : <LoginPage/>
-  }</Box>;
+  return <SnackbarProvider maxSnack={3}>
+    <Box>{
+      loggedIn === "not checked"
+          ? <AppBar/>
+          : loggedIn ? <MainPage/> : <LoginPage/>
+    }</Box>
+  </SnackbarProvider>
 }

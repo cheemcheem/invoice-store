@@ -1,19 +1,19 @@
 import React, {useCallback, useMemo, useState} from "react";
 import * as Cookie from "js-cookie";
-import {
-  Button,
-  createStyles,
-  FormControl,
-  Grid,
-  Input,
-  InputLabel,
-  Paper,
-  Theme
-} from "@material-ui/core";
 import NumberFormat from 'react-number-format';
 import {makeStyles} from "@material-ui/core/styles";
+import {Theme} from "@material-ui/core/styles";
+import {createStyles} from "@material-ui/core/styles";
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import {DropzoneArea} from 'material-ui-dropzone'
+import useRedirect from "../hooks/useRedirect";
+import {FormControl} from "@material-ui/core";
+import {Grid} from "@material-ui/core";
+import {Paper} from "@material-ui/core";
+import {InputLabel} from "@material-ui/core";
+import {Input} from "@material-ui/core";
+import {Button} from "@material-ui/core";
+import {useSnackbar} from "notistack";
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -93,6 +93,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export default function NewInvoicePage() {
   const classes = useStyles();
+  const {enqueueSnackbar} = useSnackbar();
+
   const [values, setValues] = useState({
     invoiceDate: '',
     invoiceName: '',
@@ -108,42 +110,46 @@ export default function NewInvoicePage() {
     });
   };
 
+
+  const {component, triggerRedirect} = useRedirect();
+
+
   const submit = useCallback(() => {
     const formData = new FormData();
 
     Object.keys(values).forEach((name) => formData.append(name, (values as any)[name]))
-
+    enqueueSnackbar("Uploading invoice.", {variant: "info"});
     fetch(`/api/invoice/new`, {
       method: "POST",
       headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))},
-      body: formData,
-      redirect: "follow"
+      body: formData
     })
     .then(response => {
-      response.redirected
-          ? window.location.href = response.url
-          : new Error("Response did not redirect '" + JSON.stringify(response) + "'.")
+      enqueueSnackbar("Created invoice!", {variant: "success"});
+      triggerRedirect(new URL(response.url).pathname);
     })
-
-  }, [values]);
+    .catch(() => {
+      enqueueSnackbar("Failed to create invoice.", {variant: "error"});
+    })
+    ;
+  }, [values, triggerRedirect, enqueueSnackbar]);
 
   const dropZoneChange = useMemo(() => (files: File[]) => {
     setValues({...values, invoiceFile: files[0]});
   }, [values, setValues]);
 
   return <>
+    {component}
     <Grid className={classes.grid}
-          xs={12}
           container
           direction="row"
           justify="center"
-          alignContent="center"
-    >
+          alignContent="center">
       <Grid item xs={10} className={classes.subGrid}>
         <Paper variant="elevation" className={classes.paper}>
-          <form method="post" className={classes.form} action="/api/invoice/new"
-                encType="multipart/form-data">
-            <div className={classes.subForm}>
+          <form className={classes.form}>
+            <div className={classes.subForm}
+                 onKeyPress={event => event.key === 'Enter' && submit()}>
               <FormControl className={classes.formItem}>
                 <InputLabel shrink htmlFor="invoiceDate">Date</InputLabel>
                 <Input onChange={handleChange}

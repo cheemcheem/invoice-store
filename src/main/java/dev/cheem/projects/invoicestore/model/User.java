@@ -9,12 +9,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.validator.constraints.UniqueElements;
 
 @Getter
 @Setter
@@ -25,9 +23,10 @@ public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(nullable = false)
   private Long userId;
 
-  @Column(unique = true)
+  @Column(nullable = false, unique = true)
   private String oAuth2Id;
 
   @OneToMany(mappedBy = "invoiceUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

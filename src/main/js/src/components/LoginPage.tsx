@@ -1,13 +1,12 @@
 import React, {useMemo} from "react";
-import {
-  AppBar,
-  Button,
-  createStyles,
-  Grid,
-  Paper, Theme,
-  Toolbar,
-  Typography
-} from "@material-ui/core";
+import {Toolbar} from "@material-ui/core";
+import {AppBar} from "@material-ui/core";
+import {Typography} from "@material-ui/core";
+import {Grid} from "@material-ui/core";
+import {Paper} from "@material-ui/core";
+import {Button} from "@material-ui/core";
+import {Theme} from "@material-ui/core/styles";
+import {createStyles} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -58,12 +57,12 @@ export default function LoginPage() {
           alignContent="center"
           alignItems="center"
     >
-        <Paper>
-          <Button variant="contained" color="primary" onClick={() => window.location.href = href}
-                  className="content-rounded-border-box content-inner">
-            Log in with Google (OAuth2)
-          </Button>
-        </Paper>
+      <Paper>
+        <Button variant="contained" color="primary" onClick={() => window.location.href = href}
+                className="content-rounded-border-box content-inner">
+          Log in with Google (OAuth2)
+        </Button>
+      </Paper>
     </Grid>
 
   </div>

@@ -1,15 +1,18 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {FixedSizeList, ListChildComponentProps} from 'react-window';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  createStyles,
-  ListItem,
-  ListItemText,
-  Theme,
-} from "@material-ui/core";
+import {Theme} from "@material-ui/core/styles";
+import {createStyles} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/core/styles";
+import {useTheme} from "@material-ui/core/styles";
+import {CardContent} from "@material-ui/core";
+import {Card} from "@material-ui/core";
+import {CardHeader} from "@material-ui/core";
+import {ListItem} from "@material-ui/core";
+import {ListItemText} from "@material-ui/core";
+import {CircularProgress} from "@material-ui/core";
+import {Backdrop} from "@material-ui/core";
+import useRedirect from "../hooks/useRedirect";
+import {useSnackbar} from "notistack";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -18,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) =>
         height: '100%',
         backgroundColor: theme.palette.background.paper,
         // padding: theme.spacing(2),
-        boxSizing: "border-box"
+        // boxSizing: "border-box"
       },
       row: {
         padding: theme.spacing(2),
@@ -32,36 +35,41 @@ const useStyles = makeStyles((theme: Theme) =>
       list: {
         boxSizing: "border-box",
         scrollbarWidth: "none"
-      }
-      // padding: theme.spacing(2),
-
+      },
+      backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff',
+      },
+      cardContent: {
+        padding: 0,
+        paddingBottom: 0
+      },
     }),
 );
+
+const dateTimeFormat = Intl.DateTimeFormat("en-GB", {
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric'
+})
 
 function RenderRow(props: ListChildComponentProps) {
   const classes = useStyles();
   const {index, style, data} = props;
-  const {allInvoices, dateTimeFormat} = data;
-  const [listItem, setListItem] = useState({invoiceName: "", invoiceDate: ""});
-  const onClick = useCallback(() => {
-    window.location.href = `/view/${allInvoices[index]}`
-  }, [allInvoices, index]);
-  useEffect(() => {
-    fetch(`/api/invoice/details/${allInvoices[index]}`)
-    .then(response => response.text())
-    .then(JSON.parse)
-    .then(({invoiceName, invoiceDate}) => ({
-      invoiceName,
-      invoiceDate: dateTimeFormat.format(new Date(invoiceDate))
-    }))
-    .then(setListItem)
-  }, [allInvoices, setListItem, dateTimeFormat, index]);
+  const {allInvoices} = data;
+  const invoice = allInvoices[index];
+  const {component, triggerRedirect} = useRedirect();
+
   return (
       <ListItem button
+                style={style}
                 key={index}
-                onClick={onClick}
+                onClick={() => triggerRedirect(`/view/${invoice.invoiceId}`)}
                 className={classes.row + " " + (index % 2 === 1 ? classes.darkRow : undefined)}>
-        <ListItemText primary={listItem.invoiceName} secondary={listItem.invoiceDate}/>
+        <ListItemText primary={invoice.invoiceName}
+                      secondary={dateTimeFormat.format(new Date(invoice.invoiceDate))}
+        />
+        {component}
       </ListItem>
   );
 }
@@ -69,38 +77,44 @@ function RenderRow(props: ListChildComponentProps) {
 
 export default function ViewAllInvoices({archived}: { archived?: boolean }) {
   const classes = useStyles();
+  const {enqueueSnackbar} = useSnackbar();
 
-  const [allInvoices, setAllInvoices] = useState([] as string[]);
-  const dateTimeFormat = useMemo(() => Intl.DateTimeFormat("en-GB", {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric'
-  }), []);
+  const [allInvoices, setAllInvoices] = useState(undefined as undefined | any[]);
+
   useEffect(() => {
     fetch(`/api/invoice/${archived ? "archived" : "all"}`)
     .then(response => response.text())
     .then(JSON.parse)
-    .then(setAllInvoices);
-  }, [archived, setAllInvoices]);
+    .then(setAllInvoices)
+    .catch(() => {
+      enqueueSnackbar("Failed to retrieve invoices...", {variant: "error"});
+      setAllInvoices([])
+    });
+  }, [archived, setAllInvoices, enqueueSnackbar]);
 
-
+  const theme = useTheme();
   return <div className={classes.root}>
-    {allInvoices.length === 0
-        ? <Card>
-          <CardContent>
-            <CardHeader title={"Empty!"}
-                        subheader={`Looks like there are no${archived ? " archived" : ""} invoices`}/>
-          </CardContent>
-        </Card>
-        : <FixedSizeList height={600}
-                         width={"100%"}
-                         itemSize={40}
-                         itemCount={allInvoices.length}
-                         itemData={{allInvoices, dateTimeFormat}}
-                         className={classes.list}
-        >
-          {RenderRow}
-        </FixedSizeList>
-    }
+    <Card>
+      {allInvoices
+          ? allInvoices.length === 0
+              ? <CardContent>
+                <CardHeader title={"Empty!"}
+                            subheader={`Looks like there are no${archived ? " archived" : ""} invoices`}/>
+              </CardContent>
+              : <FixedSizeList height={window.innerHeight - theme.spacing(6)}
+                               width={"100%"}
+                               itemSize={80}
+                               itemCount={allInvoices.length}
+                               itemData={{allInvoices}}
+                               className={classes.list}
+                               overscanCount={10}
+              >
+                {RenderRow}
+              </FixedSizeList>
+          : <Backdrop className={classes.backdrop} open={!allInvoices}>
+            <CircularProgress color="inherit"/>
+          </Backdrop>
+      }
+    </Card>
   </div>
 }
