@@ -108,7 +108,6 @@ function AddCreate(props: React.PropsWithChildren<any>) {
 
 export default function MainPage() {
   const {enqueueSnackbar} = useSnackbar();
-  const {component, triggerRedirect} = useRedirect();
 
   const logout = useCallback(
       () => fetch(`/logout`, {
@@ -117,12 +116,12 @@ export default function MainPage() {
       })
       .then(() => {
         enqueueSnackbar("Logged out.", {variant: "info"});
-        triggerRedirect("/");
+        window.location.reload()
       })
       .catch(() => {
         enqueueSnackbar("Failed to log out.", {variant: "error"});
       })
-      , [enqueueSnackbar, triggerRedirect]);
+      , [enqueueSnackbar]);
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = useCallback(() => setMenuOpen(!menuOpen), [menuOpen, setMenuOpen]);
   const classes = useStyles();
@@ -155,7 +154,7 @@ export default function MainPage() {
                 </List>
                 <Divider variant={"fullWidth"}/>
                 <List>
-                  <ListItem key="LogOut" onClick={logout}>
+                  <ListItem button key="LogOut" onClick={logout}>
                     <ListItemIcon><ExitToAppIcon/></ListItemIcon>
                     <ListItemText primary="Logout"/>
                   </ListItem>
@@ -182,6 +181,5 @@ export default function MainPage() {
         <Route path="/"><Redirect to={"/all"}/></Route>
       </Switch>
     </BrowserRouter>
-    {component}
   </div>
 }

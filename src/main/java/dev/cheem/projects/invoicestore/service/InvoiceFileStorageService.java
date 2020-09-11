@@ -36,6 +36,7 @@ public class InvoiceFileStorageService {
     }
 
     if (file.getSize() >= 5000000) {
+      log.debug("File size {}", file.getSize());
       throw new StorageException("File is too large (" + file.getSize() + "B, 5MB is the limit).");
     }
 
