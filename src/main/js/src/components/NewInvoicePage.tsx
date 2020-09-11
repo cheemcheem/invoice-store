@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export default function NewInvoicePage() {
   const classes = useStyles();
-  const {enqueueSnackbar} = useSnackbar();
+  const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
   const [values, setValues] = useState({
     invoiceDate: '',
@@ -118,17 +118,27 @@ export default function NewInvoicePage() {
     const formData = new FormData();
 
     Object.keys(values).forEach((name) => formData.append(name, (values as any)[name]))
-    enqueueSnackbar("Uploading invoice.", {variant: "info"});
+    const key = enqueueSnackbar("Uploading invoice.", {variant: "info", persist: true});
     fetch(`/api/invoice/new`, {
       method: "POST",
       headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))},
       body: formData
     })
     .then(response => {
-      enqueueSnackbar("Created invoice!", {variant: "success"});
-      triggerRedirect(new URL(response.url).pathname);
+      closeSnackbar(key);
+      if (response.status === 413) {
+        enqueueSnackbar("File size too large!", {variant: "warning"});
+      } else if (response.status === 400) {
+        enqueueSnackbar("Invalid file.", {variant: "error"});
+      } else if (response.status !== 200) {
+        throw new Error(`Response status ${response.status}`);
+      } else {
+        enqueueSnackbar("Created invoice!", {variant: "success"});
+        triggerRedirect(new URL(response.url).pathname);
+      }
     })
     .catch(() => {
+      closeSnackbar(key);
       enqueueSnackbar("Failed to create invoice.", {variant: "error"});
     })
     ;
@@ -194,6 +204,7 @@ export default function NewInvoicePage() {
                   onChange={dropZoneChange}
                   acceptedFiles={["image/*", ".pdf"]}
                   filesLimit={1}
+                  maxFileSize={5000000}
                   showFileNames={true}
                   classes={{
                     icon: "test-image"

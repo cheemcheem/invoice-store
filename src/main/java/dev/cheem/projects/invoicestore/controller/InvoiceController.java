@@ -2,6 +2,7 @@ package dev.cheem.projects.invoicestore.controller;
 
 import dev.cheem.projects.invoicestore.dto.BasicInvoiceDetailsDTO;
 import dev.cheem.projects.invoicestore.dto.InvoiceDetailsDTO;
+import dev.cheem.projects.invoicestore.exception.StorageException;
 import dev.cheem.projects.invoicestore.service.InvoiceDetailsStorageService;
 import dev.cheem.projects.invoicestore.service.InvoiceFileStorageService;
 import dev.cheem.projects.invoicestore.service.UserService;
@@ -56,15 +57,24 @@ public class InvoiceController {
   ) {
 
     log.info("InvoiceUploadController.uploadInvoice");
-    var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
-    var storedInvoice = invoiceDetailsStorageService
-        .storeInvoice(invoiceDate, invoiceName, invoiceTotal, invoiceTotalVAT, storedInvoiceFileId,
-            invoiceUserId);
-    var invoiceLocationURI = ServletUriComponentsBuilder.fromPath("/view/")
-        .path(storedInvoice.getInvoiceDetailsId().toString())
-        .build().toUri();
+    try {
+      var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
+      var storedInvoice = invoiceDetailsStorageService
+          .storeInvoice(invoiceDate, invoiceName, invoiceTotal, invoiceTotalVAT,
+              storedInvoiceFileId,
+              invoiceUserId);
+      var invoiceLocationURI = ServletUriComponentsBuilder.fromPath("/view/")
+          .path(storedInvoice.getInvoiceDetailsId().toString())
+          .build().toUri();
 
-    return ResponseEntity.status(HttpStatus.SEE_OTHER).location(invoiceLocationURI).build();
+      return ResponseEntity.status(HttpStatus.SEE_OTHER).location(invoiceLocationURI).build();
+    } catch (StorageException e) {
+      if (e.getMessage().startsWith("File is too large")) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).build();
+      }
+
+      return ResponseEntity.badRequest().build();
+    }
 
   }
 

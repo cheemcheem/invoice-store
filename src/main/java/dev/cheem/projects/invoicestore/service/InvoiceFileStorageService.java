@@ -27,12 +27,20 @@ public class InvoiceFileStorageService {
   @Nullable
   public Long storeFile(MultipartFile file) {
     log.info("InvoiceFileStorageService.storeFile");
-    if (Objects.isNull(file) || file.isEmpty()) {
+    if (Objects.isNull(file)) {
       return null;
     }
 
     if (Objects.isNull(file.getOriginalFilename()) || file.getOriginalFilename().isEmpty()) {
       throw new StorageException("File name is null or empty.");
+    }
+
+    if (file.getSize() >= 5000000) {
+      throw new StorageException("File is too large (" + file.getSize() + "B, 5MB is the limit).");
+    }
+
+    if (file.getSize() == 0 || file.isEmpty()) {
+      throw new StorageException("File has size 0B.");
     }
 
     var fileName = StringUtils.cleanPath(file.getOriginalFilename());

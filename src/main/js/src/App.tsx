@@ -26,7 +26,10 @@ export default function App() {
     .catch(() => setIsLoggedIn(false))
   }, [setIsLoggedIn]);
 
-  return <SnackbarProvider maxSnack={3}>
+  return <SnackbarProvider maxSnack={3} autoHideDuration={1000} anchorOrigin={{
+    vertical: 'top',
+    horizontal: 'center'
+  }}>
     <Box>{
       loggedIn === "not checked"
           ? <AppBar/>

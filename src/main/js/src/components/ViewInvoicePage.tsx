@@ -3,7 +3,6 @@ import {useParams} from "react-router-dom";
 import {Invoice} from "../common/Types";
 import download from "downloadjs";
 import * as Cookie from "js-cookie";
-
 import {makeStyles} from "@material-ui/core/styles";
 import {Theme} from "@material-ui/core/styles";
 import {createStyles} from "@material-ui/core/styles";
@@ -55,7 +54,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export default function ViewInvoicePage() {
   const classes = useStyles();
-  const {enqueueSnackbar} = useSnackbar();
+  const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const {invoiceId} = useParams();
   const [invoice, setInvoice] = useState(undefined as undefined | Invoice);
 
@@ -114,19 +113,21 @@ export default function ViewInvoicePage() {
 
   const downloadButton = useCallback(() => {
     if (!invoice?.invoiceFile) {
-      enqueueSnackbar("Can't download, no file.", {variant: "warning"})
+      return enqueueSnackbar("Can't download, no file.", {variant: "warning"})
     }
-    enqueueSnackbar("Starting download...", {variant: "info"})
+    const key = enqueueSnackbar("Starting download...", {variant: "info", persist: true})
     fetch(`/api/invoice/file/${invoice?.invoiceFile?.invoiceFileId}`)
     .then(response => response.blob())
     .then(blob => {
       download(blob, invoice?.invoiceFile?.invoiceFileName, invoice?.invoiceFile?.invoiceFileType)
     })
     .then(() => {
-      enqueueSnackbar("Download complete.", {variant: "success"})
+      closeSnackbar(key);
+      enqueueSnackbar("Download complete.", {variant: "success"});
     })
     .catch(() => {
-      enqueueSnackbar("Failed to download.", {variant: "error"})
+      closeSnackbar(key);
+      enqueueSnackbar("Failed to download.", {variant: "error"});
     })
     ;
 

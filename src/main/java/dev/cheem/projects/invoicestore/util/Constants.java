@@ -9,9 +9,11 @@ public class Constants {
   public static final String USER_ID_SESSION_KEY = "USER_ID_SESSION_KEY";
 
   /**
-   * A list of endpoints that are required to be attached to request attributes.
+   * A list of endpoints that are not required to have request attributes attached.
    */
   public static final Predicate<String> DO_NOT_INTERCEPT = Pattern.compile(
       "(/api/user)"
+          + "|(/static/.*)"
+          + "|(/[^/]*)"
   ).asMatchPredicate();
 }
