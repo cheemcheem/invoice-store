@@ -131,7 +131,7 @@ export default function ViewInvoicePage() {
     })
     ;
 
-  }, [invoice, enqueueSnackbar])
+  }, [invoice, enqueueSnackbar, closeSnackbar])
 
   const hasFile = useMemo(() => invoice?.invoiceFile !== undefined && invoice?.invoiceFile !== null, [invoice])
 

@@ -142,7 +142,7 @@ export default function NewInvoicePage() {
       enqueueSnackbar("Failed to create invoice.", {variant: "error"});
     })
     ;
-  }, [values, triggerRedirect, enqueueSnackbar]);
+  }, [values, triggerRedirect, enqueueSnackbar, closeSnackbar]);
 
   const dropZoneChange = useMemo(() => (files: File[]) => {
     setValues({...values, invoiceFile: files[0]});
