@@ -29,7 +29,6 @@ public class InvoiceFile {
   @Column(nullable = false)
   private String fileType;
 
-  @Lob
   @Basic(fetch = LAZY)
   private Blob data;
 
