@@ -119,7 +119,8 @@ export default function MainPage() {
         window.location.reload()
       })
       .catch(() => {
-        enqueueSnackbar("Failed to log out.", {variant: "error"});
+        // enqueueSnackbar("Failed to log out.", {variant: "error"});
+        window.location.reload()
       })
       , [enqueueSnackbar]);
   const [menuOpen, setMenuOpen] = useState(false);

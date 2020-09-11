@@ -36,7 +36,11 @@ public class GeneralWebSecurity extends WebSecurityConfigurerAdapter {
             .logoutUrl("/logout")
             .logoutSuccessUrl("/")
         )
-        .oauth2Login()
+        .oauth2Login(o -> o
+        .successHandler((request, response, authentication) -> {
+          response.sendRedirect("/");
+        })
+        )
     ;
   }
 
