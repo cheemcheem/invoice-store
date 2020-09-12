@@ -1,18 +1,15 @@
-import React, {useEffect, useState} from "react";
+import React, {useState, useEffect} from "react";
 import {FixedSizeList, ListChildComponentProps} from 'react-window';
-import {Theme} from "@material-ui/core/styles";
-import {createStyles} from "@material-ui/core/styles";
-import {makeStyles} from "@material-ui/core/styles";
-import {useTheme} from "@material-ui/core/styles";
-import {CardContent} from "@material-ui/core";
-import {Card} from "@material-ui/core";
-import {CardHeader} from "@material-ui/core";
-import {ListItem} from "@material-ui/core";
-import {ListItemText} from "@material-ui/core";
-import {CircularProgress} from "@material-ui/core";
-import {Backdrop} from "@material-ui/core";
+import {createStyles, makeStyles, Theme, useTheme} from "@material-ui/core/styles";
+import Card from "@material-ui/core/Card";
+import CardHeader from "@material-ui/core/CardHeader";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
 import useRedirect from "../hooks/useRedirect";
 import {useSnackbar} from "notistack";
+import Skeleton from "@material-ui/lab/Skeleton";
+import List from "@material-ui/core/List";
+import {BasicInvoice} from "../common/Types";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -20,13 +17,18 @@ const useStyles = makeStyles((theme: Theme) =>
         width: '100%',
         height: '100%',
         backgroundColor: theme.palette.background.paper,
-        // padding: theme.spacing(2),
-        // boxSizing: "border-box"
       },
       row: {
         padding: theme.spacing(2),
         width: "100%",
         backgroundColor: theme.palette.grey["100"],
+        height: 80,
+      },
+      primaryRow: {
+        width: 160
+      },
+      secondaryRow: {
+        width: "100%"
       },
       darkRow: {
         backgroundColor: theme.palette.grey["300"],
@@ -44,6 +46,10 @@ const useStyles = makeStyles((theme: Theme) =>
         padding: 0,
         paddingBottom: 0
       },
+      loadingList: {
+        padding: 0,
+        overflowY: "hidden"
+      }
     }),
 );
 
@@ -56,35 +62,39 @@ const dateTimeFormat = Intl.DateTimeFormat("en-GB", {
 function RenderRow(props: ListChildComponentProps) {
   const classes = useStyles();
   const {index, style, data} = props;
-  const {allInvoices} = data;
+  const {allInvoices} = data as { allInvoices: BasicInvoice[] };
   const invoice = allInvoices[index];
   const {component, triggerRedirect} = useRedirect();
-
   return (
       <ListItem button
                 style={style}
                 key={index}
                 onClick={() => triggerRedirect(`/view/${invoice.invoiceId}`)}
                 className={classes.row + " " + (index % 2 === 1 ? classes.darkRow : undefined)}>
-        <ListItemText primary={invoice.invoiceName}
-                      secondary={dateTimeFormat.format(new Date(invoice.invoiceDate))}
+        <ListItemText key={index}
+                      primary={invoice.invoiceName}
+                      secondary={invoice.invoiceDate}
         />
         {component}
       </ListItem>
   );
 }
 
-
 export default function ViewAllInvoices({archived}: { archived?: boolean }) {
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
 
-  const [allInvoices, setAllInvoices] = useState(undefined as undefined | any[]);
+  const [allInvoices, setAllInvoices] = useState(undefined as undefined | BasicInvoice[]);
 
   useEffect(() => {
+    setAllInvoices(undefined);
     fetch(`/api/invoice/${archived ? "archived" : "all"}`)
     .then(response => response.text())
     .then(JSON.parse)
+    .then((invoices: BasicInvoice[]) => invoices.map(invoice => ({
+      ...invoice,
+      invoiceDate: dateTimeFormat.format(new Date(invoice.invoiceDate))
+    })))
     .then(setAllInvoices)
     .catch(() => {
       enqueueSnackbar("Failed to retrieve invoices...", {variant: "error"});
@@ -92,28 +102,36 @@ export default function ViewAllInvoices({archived}: { archived?: boolean }) {
     });
   }, [archived, setAllInvoices, enqueueSnackbar]);
 
+
   const theme = useTheme();
   return <div className={classes.root}>
     <Card>
       {allInvoices
           ? allInvoices.length === 0
-              ? <CardContent>
-                <CardHeader title={"Empty!"}
+              ? <CardHeader title={"Empty!"}
                             subheader={`Looks like there are no${archived ? " archived" : ""} invoices`}/>
-              </CardContent>
               : <FixedSizeList height={window.innerHeight - theme.spacing(6)}
                                width={"100%"}
                                itemSize={80}
                                itemCount={allInvoices.length}
                                itemData={{allInvoices}}
                                className={classes.list}
-                               overscanCount={10}
-              >
+                               overscanCount={10}>
                 {RenderRow}
               </FixedSizeList>
-          : <Backdrop className={classes.backdrop} open={!allInvoices}>
-            <CircularProgress color="inherit"/>
-          </Backdrop>
+          : <List className={classes.loadingList}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map((index) => <>
+              <ListItem key={index}
+                        className={classes.row + " " + (index % 2 === 1 && classes.darkRow)}>
+                <ListItemText primary={<Skeleton/>}
+                              secondary={<Skeleton animation="wave"/>}
+                              classes={{
+                                primary: classes.primaryRow,
+                                secondary: classes.secondaryRow
+                              }}/>
+              </ListItem>
+            </>)}
+          </List>
       }
     </Card>
   </div>

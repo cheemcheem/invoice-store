@@ -1,10 +1,11 @@
 import React, {useMemo} from "react";
-import {Grid} from "@material-ui/core";
-import {Paper} from "@material-ui/core";
-import {Button} from "@material-ui/core";
-import {Theme} from "@material-ui/core/styles";
-import {createStyles} from "@material-ui/core/styles";
-import {makeStyles} from "@material-ui/core/styles";
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
+import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
+import {Skeleton} from "@material-ui/lab";
+import useLoggedIn from "../hooks/useLoggedIn";
+import {Redirect} from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -13,8 +14,9 @@ const useStyles = makeStyles((theme: Theme) =>
         height: "100vh",
         overflowY: "hidden"
       },
-      menuButton: {
-        marginRight: theme.spacing(2),
+      button: {
+        height: theme.spacing(4),
+        width: window.innerWidth - theme.spacing(4),
       },
       title: {
         flexGrow: 1,
@@ -28,6 +30,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function LoginPage() {
   const classes = useStyles();
+  const loggedIn = useLoggedIn();
 
   const href = useMemo(() => {
     let port = (window.location.port ? ':' + window.location.port : '');
@@ -38,19 +41,28 @@ export default function LoginPage() {
     return window.location.protocol + '//' + window.location.hostname + port + '/oauth2/authorization/google';
   }, []);
 
+  if (loggedIn === true) {
+    return <Redirect to="/"/>
+  }
+
   return <div className={classes.root}>
     <Grid className={classes.main}
           container
           direction="column"
           justify="center"
           alignContent="center"
-          alignItems="center"
-    >
+          alignItems="center">
       <Paper>
-        <Button variant="contained" color="primary" onClick={() => window.location.href = href}
-                className="content-rounded-border-box content-inner">
-          Log in with Google (OAuth2)
-        </Button>
+        {(loggedIn === false)
+            ? <Button variant="contained"
+                      color="primary"
+                      onClick={() => window.location.href = href}
+                      className={classes.button}>
+              Log in with Google (OAuth2)
+            </Button>
+            :
+            <Skeleton className={classes.button} variant="rect" animation="wave"/>
+        }
       </Paper>
     </Grid>
   </div>;

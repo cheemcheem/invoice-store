@@ -1,19 +1,19 @@
 import React, {useCallback, useMemo, useState} from "react";
 import * as Cookie from "js-cookie";
 import NumberFormat from 'react-number-format';
-import {makeStyles} from "@material-ui/core/styles";
-import {Theme} from "@material-ui/core/styles";
-import {createStyles} from "@material-ui/core/styles";
+import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import {DropzoneArea} from 'material-ui-dropzone'
 import useRedirect from "../hooks/useRedirect";
-import {FormControl} from "@material-ui/core";
-import {Grid} from "@material-ui/core";
-import {Paper} from "@material-ui/core";
-import {InputLabel} from "@material-ui/core";
-import {Input} from "@material-ui/core";
-import {Button} from "@material-ui/core";
+import FormControl from "@material-ui/core/FormControl";
+import Grid from "@material-ui/core/Grid";
+import InputLabel from "@material-ui/core/InputLabel";
+import Input from "@material-ui/core/Input";
+import Button from "@material-ui/core/Button";
 import {useSnackbar} from "notistack";
+import ErrorBoundary from "../common/ErrorBoundary";
+import Typography from "@material-ui/core/Typography";
+import Card from "@material-ui/core/Card";
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -44,9 +44,18 @@ function NumberFormatCustom(props: NumberFormatCustomProps) {
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   grid: {
-    height: "80%",
+    height: "100%",
+    padding: theme.spacing(2),
     paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4)
+  },
+  cardContent: {
+    width: "100%",
+    height: window.innerHeight - theme.spacing(16),
+    overflowY: "scroll",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
   },
   subGrid: {
     height: "100%"
@@ -56,13 +65,14 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
   form: {
     display: "flex",
+    padding: theme.spacing(2),
     flexDirection: "column",
     justifyContent: "space-between",
     alignContent: "center",
     justifyItems: "center",
     alignItems: "center",
     height: "inherit",
-    width: "100%",
+    width: window.innerWidth - theme.spacing(8),
   },
   subForm: {
     display: "flex",
@@ -110,9 +120,7 @@ export default function NewInvoicePage() {
     });
   };
 
-
   const {component, triggerRedirect} = useRedirect();
-
 
   const submit = useCallback(() => {
     const formData = new FormData();
@@ -130,14 +138,15 @@ export default function NewInvoicePage() {
         enqueueSnackbar("File size too large!", {variant: "warning"});
       } else if (response.status === 400) {
         enqueueSnackbar("Invalid file.", {variant: "error"});
-      } else if (response.status !== 200) {
+      } else if (!(response.status === 200 || response.status === 303 || response.status === 404)) {
         throw new Error(`Response status ${response.status}`);
       } else {
         enqueueSnackbar("Created invoice!", {variant: "success"});
         triggerRedirect(new URL(response.url).pathname);
       }
     })
-    .catch(() => {
+    .catch((e) => {
+      console.log({e})
       closeSnackbar(key);
       enqueueSnackbar("Failed to create invoice.", {variant: "error"});
     })
@@ -154,52 +163,56 @@ export default function NewInvoicePage() {
           container
           direction="row"
           justify="center"
-          alignContent="center">
-      <Grid item xs={10} className={classes.subGrid}>
-        <Paper variant="elevation" className={classes.paper}>
-          <form className={classes.form}>
-            <div className={classes.subForm}
-                 onKeyPress={event => event.key === 'Enter' && submit()}>
-              <FormControl className={classes.formItem}>
-                <InputLabel shrink htmlFor="invoiceDate">Date</InputLabel>
-                <Input onChange={handleChange}
-                       id="invoiceDate"
-                       name="invoiceDate"
-                       type="date"
-                       required/>
-              </FormControl>
-              <FormControl className={classes.formItem}>
-                <InputLabel shrink htmlFor="invoiceName">Name</InputLabel>
-                <Input onChange={handleChange}
-                       id="invoiceName"
-                       name="invoiceName"
-                       type="text"
-                       required/>
-              </FormControl>
-              <FormControl className={classes.formItem}>
-                <InputLabel shrink htmlFor="invoiceTotalVAT">VAT Total</InputLabel>
-                <Input onChange={handleChange}
-                       inputComponent={NumberFormatCustom as any}
-                       placeholder={"£0.00"}
-                       value={values.invoiceTotalVAT}
-                       id="invoiceTotalVAT"
-                       name="invoiceTotalVAT"
-                       required
-                />
-              </FormControl>
-              <FormControl className={classes.formItem}>
-                <InputLabel shrink htmlFor="invoiceTotal">Total</InputLabel>
-                <Input onChange={handleChange}
-                       inputComponent={NumberFormatCustom as any}
-                       placeholder={"£0.00"}
-                       value={values.invoiceTotal}
-                       id="invoiceTotal"
-                       name="invoiceTotal"
-                       required
-                />
-              </FormControl>
-            </div>
-            <FormControl variant={"filled"}>
+          alignContent="flex-start">
+      <Card className={classes.cardContent}>
+        <form className={classes.form}>
+          <div className={classes.subForm}
+               onKeyPress={event => event.key === 'Enter' && submit()}>
+            <FormControl className={classes.formItem}>
+              <InputLabel shrink htmlFor="invoiceDate">Date</InputLabel>
+              <Input onChange={handleChange}
+                     id="invoiceDate"
+                     name="invoiceDate"
+                     type="date"
+                     required/>
+            </FormControl>
+            <FormControl className={classes.formItem}>
+              <InputLabel shrink htmlFor="invoiceName">Name</InputLabel>
+              <Input onChange={handleChange}
+                     id="invoiceName"
+                     name="invoiceName"
+                     type="text"
+                     required/>
+            </FormControl>
+            <FormControl className={classes.formItem}>
+              <InputLabel shrink htmlFor="invoiceTotalVAT">VAT Total</InputLabel>
+              <Input onChange={handleChange}
+                     inputComponent={NumberFormatCustom as any}
+                     placeholder={"£0.00"}
+                     value={values.invoiceTotalVAT}
+                     id="invoiceTotalVAT"
+                     name="invoiceTotalVAT"
+                     required
+              />
+            </FormControl>
+            <FormControl className={classes.formItem}>
+              <InputLabel shrink htmlFor="invoiceTotal">Total</InputLabel>
+              <Input onChange={handleChange}
+                     inputComponent={NumberFormatCustom as any}
+                     placeholder={"£0.00"}
+                     value={values.invoiceTotal}
+                     id="invoiceTotal"
+                     name="invoiceTotal"
+                     required
+              />
+            </FormControl>
+          </div>
+          <FormControl variant={"filled"}>
+            <ErrorBoundary renderError={<>
+              <Typography variant="body1" color="error">
+                Cannot attach a file at this time.
+              </Typography>
+            </>}>
               <DropzoneArea
                   onChange={dropZoneChange}
                   acceptedFiles={["image/*", ".pdf"]}
@@ -214,22 +227,22 @@ export default function NewInvoicePage() {
                     item: classes.imageItem,
                   }}
               />
-            </FormControl>
-            <input type="hidden" name="_csrf" value={String(Cookie.get("XSRF-TOKEN"))}/>
-            <FormControl className={classes.formItem}>
-              <Button id="invoiceSubmit"
-                      type="button"
-                      variant="outlined"
-                      color="primary"
-                      onClick={submit}
-                      startIcon={<CloudUploadIcon/>}
-                      disableElevation>
-                Create
-              </Button>
-            </FormControl>
-          </form>
-        </Paper>
-      </Grid>
+            </ErrorBoundary>
+          </FormControl>
+          <input type="hidden" name="_csrf" value={String(Cookie.get("XSRF-TOKEN"))}/>
+          <FormControl className={classes.formItem}>
+            <Button id="invoiceSubmit"
+                    type="button"
+                    variant="outlined"
+                    color="primary"
+                    onClick={submit}
+                    startIcon={<CloudUploadIcon/>}
+                    disableElevation>
+              Create
+            </Button>
+          </FormControl>
+        </form>
+      </Card>
     </Grid>
   </>
 

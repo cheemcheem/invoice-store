@@ -11,3 +11,8 @@ export type Invoice = {
   },
   invoiceArchived: boolean
 }
+export type BasicInvoice = {
+  invoiceId: string,
+  invoiceDate: string,
+  invoiceName: string
+}

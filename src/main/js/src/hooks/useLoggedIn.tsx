@@ -1,11 +1,8 @@
-import React from "react";
 import {useState} from "react";
 import {useCallback} from "react";
 import {useEffect} from "react";
-import {AppBar} from "@material-ui/core";
-import {Redirect} from "react-router-dom";
 
-export default function WithAuth({children}: React.PropsWithChildren<any>) {
+export default function useLoggedIn() {
   const [loggedIn, setIsLoggedIn] = useState("not checked" as "not checked" | boolean);
 
   const checkLoggedIn = useCallback(() => {
@@ -27,13 +24,5 @@ export default function WithAuth({children}: React.PropsWithChildren<any>) {
 
   useEffect(checkLoggedIn, [checkLoggedIn]);
 
-  if (loggedIn === "not checked") {
-    return <AppBar/>;
-  }
-
-  if (!loggedIn) {
-    return <Redirect to="/login"/>
-  }
-
-  return children;
+  return loggedIn;
 }
