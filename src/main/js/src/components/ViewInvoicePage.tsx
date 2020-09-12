@@ -37,7 +37,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
   cardContent: {
     width: "100%",
-    height: window.innerHeight - theme.spacing(16)
+    height: window.innerHeight - theme.spacing(16),
+    overflowY: "scroll"
   },
   buttons: {
     display: "flex",

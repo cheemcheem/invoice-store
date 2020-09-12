@@ -1,7 +1,4 @@
 import React, {useMemo} from "react";
-import {Toolbar} from "@material-ui/core";
-import {AppBar} from "@material-ui/core";
-import {Typography} from "@material-ui/core";
 import {Grid} from "@material-ui/core";
 import {Paper} from "@material-ui/core";
 import {Button} from "@material-ui/core";
@@ -30,6 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function LoginPage() {
+  const classes = useStyles();
 
   const href = useMemo(() => {
     let port = (window.location.port ? ':' + window.location.port : '');
@@ -40,16 +38,7 @@ export default function LoginPage() {
     return window.location.protocol + '//' + window.location.hostname + port + '/oauth2/authorization/google';
   }, []);
 
-  const classes = useStyles();
-
   return <div className={classes.root}>
-    <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h6" className={classes.title}>
-          Invoice Store
-        </Typography>
-      </Toolbar>
-    </AppBar>
     <Grid className={classes.main}
           container
           direction="column"
@@ -64,7 +53,5 @@ export default function LoginPage() {
         </Button>
       </Paper>
     </Grid>
-
-  </div>
-      ;
+  </div>;
 }
