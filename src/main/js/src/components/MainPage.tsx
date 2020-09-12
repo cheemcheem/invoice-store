@@ -76,21 +76,20 @@ export default function MainPage() {
                 onClose={() => setMenuOpen(false)}
                 onOpen={() => setMenuOpen(true)}
                 className={classes.drawer}
-                ModalProps={{keepMounted: true}}
-            >
+                ModalProps={{keepMounted: true}}>
               <div role="presentation">
                 <List>
                   <ListItem key="Title">
                     <ListItemText primary="Pages"/>
                   </ListItem>
                 </List>
-                <Divider/>
+                <Divider variant="fullWidth"/>
                 <List>
                   <ListItemLink to="/all" primary="Invoices" icon={<DescriptionIcon/>}/>
                   <ListItemLink to="/archived" primary="Archive" icon={<ArchiveIcon/>}/>
                   <ListItemLink to="/new" primary="Create" icon={<AddIcon/>}/>
                 </List>
-                <Divider variant={"fullWidth"}/>
+                <Divider variant="fullWidth"/>
                 <List>
                   <ListItemLink to="/logout" primary="Logout" icon={<ExitToAppIcon/>}/>
                 </List>

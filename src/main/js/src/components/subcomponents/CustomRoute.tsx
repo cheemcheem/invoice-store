@@ -3,10 +3,10 @@ import {WithCreateButton} from "./WithCreateButton";
 import WithAuth from "./WithAuth";
 import {Route} from "react-router-dom";
 
-export default function CustomRoute({children, withAuth, withCreate, path}: React.PropsWithChildren<any> & { withAuth: boolean, withCreateButton: boolean, path: string }) {
+export default function CustomRoute({children, withAuth, withCreateButton, path}: React.PropsWithChildren<{ withAuth?: boolean, withCreateButton?: boolean, path: string }>) {
   let component = children;
 
-  if (withCreate) {
+  if (withCreateButton) {
     component = <WithCreateButton>{component}</WithCreateButton>;
   }
 
