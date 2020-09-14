@@ -5,6 +5,7 @@ import {SnackbarProvider} from 'notistack';
 import {makeStyles} from "@material-ui/core/styles";
 import {Theme} from "@material-ui/core/styles";
 import {createStyles} from "@material-ui/core/styles";
+
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
       snackbar: {
