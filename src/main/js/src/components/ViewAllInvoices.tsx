@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {FixedSizeList, ListChildComponentProps} from 'react-window';
 import {createStyles, makeStyles, Theme, useTheme} from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
@@ -10,6 +10,7 @@ import {useSnackbar} from "notistack";
 import Skeleton from "@material-ui/lab/Skeleton";
 import List from "@material-ui/core/List";
 import {BasicInvoice} from "../common/Types";
+import FormatDate from "../common/DateTimeFormat";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -53,12 +54,6 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const dateTimeFormat = Intl.DateTimeFormat("en-GB", {
-  year: 'numeric',
-  month: 'numeric',
-  day: 'numeric'
-})
-
 function RenderRow(props: ListChildComponentProps) {
   const classes = useStyles();
   const {index, style, data} = props;
@@ -93,7 +88,7 @@ export default function ViewAllInvoices({archived}: { archived?: boolean }) {
     .then(JSON.parse)
     .then((invoices: BasicInvoice[]) => invoices.map(invoice => ({
       ...invoice,
-      invoiceDate: dateTimeFormat.format(new Date(invoice.invoiceDate))
+      invoiceDate: FormatDate(new Date(invoice.invoiceDate))
     })))
     .then(setAllInvoices)
     .catch(() => {

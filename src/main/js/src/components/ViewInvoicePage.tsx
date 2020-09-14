@@ -21,6 +21,8 @@ import Typography from "@material-ui/core/Typography";
 import useRedirect from "../hooks/useRedirect";
 import {useSnackbar} from "notistack";
 import Skeleton from "@material-ui/lab/Skeleton";
+import FormatDate from "../common/DateTimeFormat";
+import useInvoice from "../hooks/useInvoice";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   grid: {
@@ -64,16 +66,9 @@ export default function ViewInvoicePage() {
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const {component, triggerRedirect} = useRedirect();
   const {invoiceId} = useParams();
-  const [invoice, setInvoice] = useState(undefined as undefined | Invoice);
+  const [refresh, triggerRefresh] = useState({});
+  const invoice = useInvoice(invoiceId, refresh);
   const [canRender, setCanRender] = useState(true);
-
-  const update = useCallback(() => {
-    fetch(`/api/invoice/details/${invoiceId}`)
-    .then(response => response.text())
-    .then(JSON.parse)
-    .then(invoice => ({...invoice, invoiceDate: new Date(invoice.invoiceDate)}))
-    .then(setInvoice);
-  }, [setInvoice, invoiceId]);
 
   const archiveButton = useCallback(() => {
     fetch(`/api/invoice/${invoice?.invoiceArchived ? "restore" : "archive"}/${invoice?.invoiceDetailsId}`, {
@@ -87,7 +82,7 @@ export default function ViewInvoicePage() {
         enqueueSnackbar("Archived invoice.", {variant: "warning"})
       }
     })
-    .then(update)
+    .then(() => triggerRefresh({}))
     .catch(() => {
       if (invoice?.invoiceArchived) {
         enqueueSnackbar("Failed to restore invoice.", {variant: "error"})
@@ -95,7 +90,7 @@ export default function ViewInvoicePage() {
         enqueueSnackbar("Failed to archive invoice.", {variant: "error"})
       }
     })
-  }, [invoice, update, enqueueSnackbar]);
+  }, [invoice, triggerRefresh, enqueueSnackbar]);
 
   const deleteButton = useCallback(() => {
     fetch(`/api/invoice/delete/${invoice?.invoiceDetailsId}`, {
@@ -140,14 +135,6 @@ export default function ViewInvoicePage() {
         && invoice?.invoiceFile !== null
   }, [invoice]);
 
-  const dateTimeFormat = useMemo(() => Intl.DateTimeFormat("en-GB", {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric'
-  }), []);
-
-  useEffect(update, [update]);
-
   return <>
     <Grid className={classes.grid}
           container
@@ -177,7 +164,7 @@ export default function ViewInvoicePage() {
         <CardContent>
           <CardHeader title={"Name"} subheader={invoice ? invoice.invoiceName : <Skeleton/>}/>
           <CardHeader title={"Date"}
-                      subheader={invoice ? dateTimeFormat.format(invoice.invoiceDate) :
+                      subheader={invoice ? FormatDate(invoice.invoiceDate) :
                           <Skeleton/>}/>
           <CardHeader title={"Total VAT"}
                       subheader={invoice ? `£${invoice.invoiceTotalVAT}` : <Skeleton/>}/>

@@ -16,6 +16,10 @@ export default function useLoggedIn() {
         return setIsLoggedIn(false);
       }
 
+     if (!String(response.status).startsWith("2")) {
+       return setIsLoggedIn(false);
+     }
+
       return setIsLoggedIn(true);
 
     })

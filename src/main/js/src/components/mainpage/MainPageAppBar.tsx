@@ -6,6 +6,8 @@ import React from "react";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import MainPageDrawer from "./MainPageDrawer";
 import NavBarCreateButton from "./NavBarCreateButton";
+import NavBarBackButton from "./NavBarBackButton";
+import SimpleNavBarBackButton from "./SimpleNavBarBackButton";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -30,14 +32,18 @@ export default function MainPageAppBar() {
             <Route path="/all">View All Invoices</Route>
             <Route path="/archived">View Archived Invoices</Route>
             <Route path="/new">Create New Invoice</Route>
-            <Route path="/view/:invoiceId">View Invoice</Route>
+            <Route path="/view">View Invoice</Route>
             <Route path="/login">Login to Invoice Store</Route>
             <Route path="/logout">Logout from Invoice Store</Route>
             <Route path="/error">Invoice Store</Route>
           </Switch>
         </Typography>
         <Switch>
-          <Route path={["/error", "/login", "/logout", "/new"]}/>
+          <Route path={["/create"]}><SimpleNavBarBackButton/></Route>
+          <Route path={["/view/:invoiceId"]}><NavBarBackButton/></Route>
+        </Switch>
+        <Switch>
+          <Route path={["/error", "/login", "/logout", "/new", "/archived"]}/>
           <Route><NavBarCreateButton/></Route>
         </Switch>
       </Toolbar>

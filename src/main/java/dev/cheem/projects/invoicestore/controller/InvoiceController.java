@@ -72,10 +72,13 @@ public class InvoiceController {
       if (e.getMessage().startsWith("File is too large")) {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).build();
       }
-
+    } catch (Exception e) {
+      log.error("Unhandled exception creating new invoice.", e);
       return ResponseEntity.badRequest().build();
     }
 
+    log.error("Failed to build a previous response.");
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 
   @GetMapping("/details/{invoiceDetailsId}")

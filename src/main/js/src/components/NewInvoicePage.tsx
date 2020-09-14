@@ -14,6 +14,9 @@ import {useSnackbar} from "notistack";
 import ErrorBoundary from "../common/ErrorBoundary";
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
+import DateFnsUtils from '@date-io/date-fns';
+import {KeyboardDatePicker, MuiPickersUtilsProvider,} from '@material-ui/pickers';
+import FormatDate from "../common/DateTimeFormat";
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -100,13 +103,12 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
-
 export default function NewInvoicePage() {
   const classes = useStyles();
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
   const [values, setValues] = useState({
-    invoiceDate: '',
+    invoiceDate: new Date(),
     invoiceName: '',
     invoiceTotalVAT: '',
     invoiceTotal: '',
@@ -125,7 +127,13 @@ export default function NewInvoicePage() {
   const submit = useCallback(() => {
     const formData = new FormData();
 
-    Object.keys(values).forEach((name) => formData.append(name, (values as any)[name]))
+    Object.keys(values).forEach((name) => {
+      if (name === "invoiceDate") {
+        return formData.append(name, (values)[name].toISOString().split("T")[0]);
+      }
+      return formData.append(name, (values as any)[name]);
+    })
+
     const key = enqueueSnackbar("Uploading invoice.", {variant: "info", persist: true});
     fetch(`/api/invoice/new`, {
       method: "POST",
@@ -169,15 +177,25 @@ export default function NewInvoicePage() {
           <div className={classes.subForm}
                onKeyPress={event => event.key === 'Enter' && submit()}>
             <FormControl className={classes.formItem}>
-              <InputLabel shrink htmlFor="invoiceDate">Date</InputLabel>
-              <Input onChange={handleChange}
-                     id="invoiceDate"
-                     name="invoiceDate"
-                     type="date"
-                     required/>
+              <ErrorBoundary renderError={<Typography variant="h6">error</Typography>}>
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                  <KeyboardDatePicker
+                      fullWidth
+                      margin="normal"
+                      id="invoiceDate"
+                      label="Invoice Date"
+                      format="dd/MM/yyyy"
+                      value={values.invoiceDate}
+                      onChange={(date) => setValues({...values, invoiceDate: date || values.invoiceDate})}
+                      KeyboardButtonProps={{
+                        'aria-label': 'change date',
+                      }}
+                  />
+                </MuiPickersUtilsProvider>
+              </ErrorBoundary>
             </FormControl>
             <FormControl className={classes.formItem}>
-              <InputLabel shrink htmlFor="invoiceName">Name</InputLabel>
+              <InputLabel shrink htmlFor="invoiceName">Invoice Name</InputLabel>
               <Input onChange={handleChange}
                      id="invoiceName"
                      name="invoiceName"
