@@ -60,7 +60,7 @@ public class InvoiceController {
     try {
       var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
       var storedInvoice = invoiceDetailsStorageService
-          .storeInvoice(invoiceDate, invoiceName, invoiceTotal, invoiceTotalVAT,
+          .storeInvoice(invoiceDate, invoiceName, invoiceTotalVAT, invoiceTotal,
               storedInvoiceFileId,
               invoiceUserId);
       var invoiceLocationURI = ServletUriComponentsBuilder.fromPath("/view/")

@@ -102,7 +102,7 @@ export default function Create() {
       if (name === "invoiceDate") {
         return formData.append(name, (values)[name].toISOString().split("T")[0]);
       }
-      return formData.append(name, (values as any)[name]);
+      return formData.append(name, (values)[name]);
     })
 
     const key = enqueueSnackbar("Uploading invoice.", {variant: "info", persist: true});
