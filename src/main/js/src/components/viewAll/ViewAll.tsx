@@ -1,16 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {FixedSizeList, ListChildComponentProps} from 'react-window';
+import {FixedSizeList} from 'react-window';
 import {createStyles, makeStyles, Theme, useTheme} from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-import useRedirect from "../hooks/useRedirect";
 import {useSnackbar} from "notistack";
 import Skeleton from "@material-ui/lab/Skeleton";
 import List from "@material-ui/core/List";
-import {BasicInvoice} from "../common/Types";
-import FormatDate from "../common/DateTimeFormat";
+import {BasicInvoice} from "../../utils/Types";
+import FormatDate from "../../utils/DateTimeFormat";
+import RenderRow, {useStyles as useRenderRowStyles} from "../viewAll/RenderRow";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -19,21 +19,11 @@ const useStyles = makeStyles((theme: Theme) =>
         height: '100%',
         backgroundColor: theme.palette.background.paper,
       },
-      row: {
-        padding: theme.spacing(2),
-        width: "100%",
-        backgroundColor: theme.palette.grey["100"],
-        height: 80,
-      },
       primaryRow: {
         width: 160
       },
       secondaryRow: {
         width: "100%"
-      },
-      darkRow: {
-        backgroundColor: theme.palette.grey["300"],
-        color: theme.palette.text.primary
       },
       list: {
         boxSizing: "border-box",
@@ -54,29 +44,12 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-function RenderRow(props: ListChildComponentProps) {
-  const classes = useStyles();
-  const {index, style, data} = props;
-  const {allInvoices} = data as { allInvoices: BasicInvoice[] };
-  const invoice = allInvoices[index];
-  const {component, triggerRedirect} = useRedirect();
-  return (
-      <ListItem button
-                style={style}
-                key={index}
-                onClick={() => triggerRedirect(`/view/${invoice.invoiceId}`)}
-                className={classes.row + " " + (index % 2 === 1 ? classes.darkRow : undefined)}>
-        <ListItemText key={index}
-                      primary={invoice.invoiceName}
-                      secondary={invoice.invoiceDate}
-        />
-        {component}
-      </ListItem>
-  );
-}
+export type ViewAllProps = { archived?: boolean };
 
-export default function ViewAllInvoices({archived}: { archived?: boolean }) {
+export default function ViewAll({archived}: ViewAllProps) {
   const classes = useStyles();
+  const rowClasses = useRenderRowStyles();
+  const theme = useTheme();
   const {enqueueSnackbar} = useSnackbar();
 
   const [allInvoices, setAllInvoices] = useState(undefined as undefined | BasicInvoice[]);
@@ -98,7 +71,6 @@ export default function ViewAllInvoices({archived}: { archived?: boolean }) {
   }, [archived, setAllInvoices, enqueueSnackbar]);
 
 
-  const theme = useTheme();
   return <div className={classes.root}>
     <Card>
       {allInvoices
@@ -117,7 +89,7 @@ export default function ViewAllInvoices({archived}: { archived?: boolean }) {
           : <List className={classes.loadingList}>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map((index) => <>
               <ListItem key={index}
-                        className={classes.row + " " + (index % 2 === 1 && classes.darkRow)}>
+                        className={rowClasses.row + " " + (index % 2 === 1 && rowClasses.darkRow)}>
                 <ListItemText primary={<Skeleton/>}
                               secondary={<Skeleton animation="wave"/>}
                               classes={{

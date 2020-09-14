@@ -1,28 +1,31 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {useParams} from "react-router-dom";
-import {Invoice} from "../common/Types";
-import download from "downloadjs";
+import {makeStyles} from "@material-ui/core/styles";
+import {Theme} from "@material-ui/core/styles";
+import {createStyles} from "@material-ui/core/styles";
+import {useSnackbar} from "notistack";
+import useRedirect from "../../hooks/useRedirect";
+import {useState} from "react";
+import {useCallback} from "react";
+import {useMemo} from "react";
+import React from "react";
 import * as Cookie from "js-cookie";
-import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
-import DeleteIcon from '@material-ui/icons/Delete';
-import ArchiveIcon from '@material-ui/icons/Archive';
-import RestoreIcon from '@material-ui/icons/Restore';
-import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
-import CardContent from "@material-ui/core/CardContent";
+import download from "downloadjs";
 import Grid from "@material-ui/core/Grid";
 import Card from "@material-ui/core/Card";
 import CardActionArea from "@material-ui/core/CardActionArea";
 import CardMedia from "@material-ui/core/CardMedia";
-import Button from "@material-ui/core/Button";
-import CardActions from "@material-ui/core/CardActions";
 import CardHeader from "@material-ui/core/CardHeader";
 import Typography from "@material-ui/core/Typography";
-import useRedirect from "../hooks/useRedirect";
-import {useSnackbar} from "notistack";
+import AttachFileIcon from "@material-ui/icons/AttachFile";
+import CardContent from "@material-ui/core/CardContent";
 import Skeleton from "@material-ui/lab/Skeleton";
-import FormatDate from "../common/DateTimeFormat";
-import useInvoice from "../hooks/useInvoice";
+import FormatDate from "../../utils/DateTimeFormat";
+import CardActions from "@material-ui/core/CardActions";
+import Button from "@material-ui/core/Button";
+import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import RestoreIcon from "@material-ui/icons/Restore";
+import ArchiveIcon from "@material-ui/icons/Archive";
+import DeleteIcon from "@material-ui/icons/Delete";
+import {Invoice} from "../../utils/Types";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   grid: {
@@ -60,14 +63,14 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   }
 }));
 
-
-export default function ViewInvoicePage() {
+type ViewProps = {
+  invoice: Invoice | undefined,
+  triggerRefresh: any
+}
+export default function View({invoice, triggerRefresh}: ViewProps) {
   const classes = useStyles();
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const {component, triggerRedirect} = useRedirect();
-  const {invoiceId} = useParams();
-  const [refresh, triggerRefresh] = useState({});
-  const invoice = useInvoice(invoiceId, refresh);
   const [canRender, setCanRender] = useState(true);
 
   const archiveButton = useCallback(() => {
@@ -162,13 +165,13 @@ export default function ViewInvoicePage() {
           }
         </CardActionArea>
         <CardContent>
-          <CardHeader title={"Name"} subheader={invoice ? invoice.invoiceName : <Skeleton/>}/>
-          <CardHeader title={"Date"}
+          <CardHeader title={"NAME"} subheader={invoice ? invoice.invoiceName : <Skeleton/>}/>
+          <CardHeader title={"DATE"}
                       subheader={invoice ? FormatDate(invoice.invoiceDate) :
                           <Skeleton/>}/>
-          <CardHeader title={"Total VAT"}
+          <CardHeader title={"VAT TOTAL"}
                       subheader={invoice ? `£${invoice.invoiceTotalVAT}` : <Skeleton/>}/>
-          <CardHeader title={"Total"}
+          <CardHeader title={"TOTAL"}
                       subheader={invoice ? `£${invoice.invoiceTotal}` : <Skeleton/>}/>
           <CardActions className={classes.buttons}>
             <Button disabled={!invoice || !hasFile} color="primary" onClick={downloadButton}

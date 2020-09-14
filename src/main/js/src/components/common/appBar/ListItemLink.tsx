@@ -1,11 +1,11 @@
 import React from "react";
-import useRedirect from "../../hooks/useRedirect";
 import {NavLink, NavLinkProps} from "react-router-dom";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import Typography from "@material-ui/core/Typography";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
+import useRedirect from "../../../hooks/useRedirect";
 
 interface ListItemLinkProps {
   icon?: React.ReactElement;
@@ -25,7 +25,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ListItemLink(props: ListItemLinkProps) {
   const classes = useStyles();
-
   const {icon, primary, to} = props;
   const {component, triggerRedirect} = useRedirect();
 

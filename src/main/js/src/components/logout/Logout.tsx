@@ -1,7 +1,7 @@
 import {useSnackbar} from "notistack";
 import {useCallback, useEffect} from "react";
 import * as Cookie from "js-cookie";
-import useRedirect from "../hooks/useRedirect";
+import useRedirect from "../../hooks/useRedirect";
 
 export default function Logout() {
   const {enqueueSnackbar} = useSnackbar();

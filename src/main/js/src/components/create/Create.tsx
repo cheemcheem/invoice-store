@@ -1,49 +1,21 @@
-import React, {useCallback, useMemo, useState} from "react";
-import * as Cookie from "js-cookie";
-import NumberFormat from 'react-number-format';
-import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import {DropzoneArea} from 'material-ui-dropzone'
-import useRedirect from "../hooks/useRedirect";
-import FormControl from "@material-ui/core/FormControl";
-import Grid from "@material-ui/core/Grid";
-import InputLabel from "@material-ui/core/InputLabel";
-import Input from "@material-ui/core/Input";
-import Button from "@material-ui/core/Button";
 import {useSnackbar} from "notistack";
+import React, {useCallback, useMemo, useState} from "react";
+import useRedirect from "../../hooks/useRedirect";
+import * as Cookie from "js-cookie";
+import Grid from "@material-ui/core/Grid";
+import Card from "@material-ui/core/Card";
+import FormControl from "@material-ui/core/FormControl";
 import ErrorBoundary from "../common/ErrorBoundary";
 import Typography from "@material-ui/core/Typography";
-import Card from "@material-ui/core/Card";
-import DateFnsUtils from '@date-io/date-fns';
-import {KeyboardDatePicker, MuiPickersUtilsProvider,} from '@material-ui/pickers';
-import FormatDate from "../common/DateTimeFormat";
-
-interface NumberFormatCustomProps {
-  inputRef: (instance: NumberFormat | null) => void;
-  onChange: (event: { target: { name: string; value: string } }) => void;
-  name: string;
-}
-
-function NumberFormatCustom(props: NumberFormatCustomProps) {
-  const {inputRef, onChange, ...other} = props;
-  return (
-      <NumberFormat
-          {...other}
-          getInputRef={inputRef}
-          onValueChange={(values) => {
-            onChange({
-              target: {
-                name: props.name,
-                value: values.value,
-              },
-            });
-          }}
-          thousandSeparator
-          isNumericString
-          prefix="£"
-      />
-  );
-}
+import {MuiPickersUtilsProvider,KeyboardDatePicker} from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
+import InputLabel from "@material-ui/core/InputLabel";
+import Input from "@material-ui/core/Input";
+import NumberFormatCustom from "./NumberFormat";
+import {DropzoneArea} from "material-ui-dropzone";
+import Button from "@material-ui/core/Button";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   grid: {
@@ -102,8 +74,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     minWidth: "100%"
   },
 }));
-
-export default function NewInvoicePage() {
+export default function Create() {
   const classes = useStyles();
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
@@ -183,10 +154,13 @@ export default function NewInvoicePage() {
                       fullWidth
                       margin="normal"
                       id="invoiceDate"
-                      label="Invoice Date"
+                      label="INVOICE DATE"
                       format="dd/MM/yyyy"
                       value={values.invoiceDate}
-                      onChange={(date) => setValues({...values, invoiceDate: date || values.invoiceDate})}
+                      onChange={(date) => setValues({
+                        ...values,
+                        invoiceDate: date || values.invoiceDate
+                      })}
                       KeyboardButtonProps={{
                         'aria-label': 'change date',
                       }}
@@ -195,7 +169,7 @@ export default function NewInvoicePage() {
               </ErrorBoundary>
             </FormControl>
             <FormControl className={classes.formItem}>
-              <InputLabel shrink htmlFor="invoiceName">Invoice Name</InputLabel>
+              <InputLabel shrink htmlFor="invoiceName">INVOICE NAME</InputLabel>
               <Input onChange={handleChange}
                      id="invoiceName"
                      name="invoiceName"
@@ -203,7 +177,7 @@ export default function NewInvoicePage() {
                      required/>
             </FormControl>
             <FormControl className={classes.formItem}>
-              <InputLabel shrink htmlFor="invoiceTotalVAT">VAT Total</InputLabel>
+              <InputLabel shrink htmlFor="invoiceTotalVAT">VAT TOTAL</InputLabel>
               <Input onChange={handleChange}
                      inputComponent={NumberFormatCustom as any}
                      placeholder={"£0.00"}
@@ -214,7 +188,7 @@ export default function NewInvoicePage() {
               />
             </FormControl>
             <FormControl className={classes.formItem}>
-              <InputLabel shrink htmlFor="invoiceTotal">Total</InputLabel>
+              <InputLabel shrink htmlFor="invoiceTotal">TOTAL</InputLabel>
               <Input onChange={handleChange}
                      inputComponent={NumberFormatCustom as any}
                      placeholder={"£0.00"}
@@ -263,5 +237,4 @@ export default function NewInvoicePage() {
       </Card>
     </Grid>
   </>
-
 }

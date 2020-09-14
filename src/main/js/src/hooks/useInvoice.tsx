@@ -1,4 +1,4 @@
-import {Invoice} from "../common/Types";
+import {Invoice} from "../utils/Types";
 import {useState} from "react";
 import {useEffect} from "react";
 
