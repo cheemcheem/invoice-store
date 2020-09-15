@@ -6,7 +6,7 @@ import App from './App';
 test('renders app', async () => {
   const {getByText} = render(<App/>);
 
-  const text = await waitForElement(() => getByText(/Invoice Store/));
+  const text = await waitForElement(() => getByText(/Invoice/));
 
   expect(text).toBeInTheDocument();
 });
