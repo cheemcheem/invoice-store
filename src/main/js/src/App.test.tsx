@@ -4,9 +4,9 @@ import {getByText} from "@testing-library/react";
 import App from './App';
 
 test('renders app', async () => {
-  const {getByText} = render(<App/>);
+  const {getAllByText} = render(<App/>);
 
-  const text = await waitForElement(() => getByText(/Invoice/));
+  const text = await waitForElement(() => getAllByText(/Invoice/));
 
   expect(text).toBeInTheDocument();
 });
