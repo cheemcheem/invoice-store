@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>invoice-store</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>Invoice Store</name>
+  <description>Web App for storing invoices.</description>
+  <url>https://invoice.cheem.uk</url>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License v3.0</name>
+      <url>https://spdx.org/licenses/GPL-3.0-or-later.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Kathan Cheema</name>
+      <email>kathan@cheem.uk</email>
+      <url>https://cheem.uk</url>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/${github.username}/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:ssh://github.com:${github.username}/${project.artifactId}.git</developerConnection>
+    <url>https://github.com/${github.username}/${project.artifactId}/tree/master</url>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/cheemcheem/spring-boot-react-parent</url>
+    </repository>
+  </repositories>
+
+  <parent>
+    <groupId>dev.cheem.projects</groupId>
+    <artifactId>spring-boot-react-parent</artifactId>
+    <version>1.1.0</version>
+  </parent>
+
+  <build>
+    <finalName>${project.artifactId}</finalName>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <artifactId>spring-boot-starter-oauth2-client</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+  </dependencies>
+
+  <properties>
+    <github.username>cheemcheem</github.username>
+  </properties>
+
+</project>
