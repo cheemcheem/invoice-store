@@ -5,7 +5,7 @@ See it live at [invoice.cheem.uk](https://invoice.cheem.uk)
 ### What this aims to be
 An invoice manager. This was created to solve a problem of mine, it can be used to upload documents or photographs, as well as the totals of invoices.
 
-<div style="width:100%">
+<img style="width:100%">
   <img src="/screenshots/login.png?raw=true"      align="left" height="275">
   <img src="/screenshots/date.png?raw=true"       align="left" height="275">
   <img src="/screenshots/form.png?raw=true"       align="left" height="275">
