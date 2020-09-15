@@ -1,6 +1,5 @@
 import React from 'react';
 import {render, waitForElement} from '@testing-library/react';
-import {getByText} from "@testing-library/react";
 import App from './App';
 
 test('renders app', async () => {
@@ -8,5 +7,5 @@ test('renders app', async () => {
 
   const text = await waitForElement(() => getAllByText(/Invoice/));
 
-  expect(text).toBeInTheDocument();
+  text.forEach(t => expect(t).toBeInTheDocument());
 });
