@@ -1,14 +1,17 @@
-import React from "react";
+import React, {lazy, Suspense} from "react";
 import {BrowserRouter, Redirect, Route, Switch} from "react-router-dom";
-import CreatePage from "./CreatePage";
-import ViewPage from "./ViewPage";
 import {createStyles, makeStyles} from "@material-ui/core/styles";
-import LoginPage from "./LoginPage";
-import LogoutPage from "./LogoutPage";
-import AuthRoute from "./main/AuthRoute";
-import ErrorPage from "./ErrorPage";
 import ErrorBoundary from "./common/ErrorBoundary";
-import ViewAllPage from "./ViewAllPage";
+import AuthRoute from "./main/AuthRoute";
+import {useMemo} from "react";
+import Page from "./common/Page";
+
+const CreatePage = lazy(() => import("./CreatePage"));
+const ViewPage = lazy(() => import("./ViewPage"));
+const LoginPage = lazy(() => import("./LoginPage"));
+const LogoutPage = lazy(() => import("./LogoutPage"));
+const ErrorPage = lazy(() => import("./ErrorPage"));
+const ViewAllPage = lazy(() => import("./ViewAllPage"));
 
 const useStyles = makeStyles(() =>
     createStyles({
@@ -26,18 +29,18 @@ const useStyles = makeStyles(() =>
 
 export default function MainPage() {
   const classes = useStyles();
-
+  const fallback = useMemo(() => <Page title={""}/>, [])
   return <MainPageErrorBoundary>
     <div className={classes.root}>
       <BrowserRouter>
         <Switch>
-          <AuthRoute path="/all"><ViewAllPage/></AuthRoute>
-          <AuthRoute path="/archived"><ViewAllPage archived/></AuthRoute>
-          <AuthRoute path="/new"><CreatePage/></AuthRoute>
-          <AuthRoute path="/logout"><LogoutPage/></AuthRoute>
-          <Route path="/view/:invoiceId"><ViewPage/></Route>
-          <Route path="/login"><LoginPage/></Route>
-          <Route path="/error"><ErrorPage/></Route>
+          <AuthRoute path="/all"><Suspense fallback={fallback}><ViewAllPage/></Suspense></AuthRoute>
+          <AuthRoute path="/archived"><Suspense fallback={fallback}><ViewAllPage archived/></Suspense></AuthRoute>
+          <AuthRoute path="/new"><Suspense fallback={fallback}><CreatePage/></Suspense></AuthRoute>
+          <AuthRoute path="/logout"><Suspense fallback={fallback}><LogoutPage/></Suspense></AuthRoute>
+          <Route path="/view/:invoiceId"><Suspense fallback={fallback}><ViewPage/></Suspense></Route>
+          <Route path="/login"><Suspense fallback={fallback}><LoginPage/></Suspense></Route>
+          <Route path="/error"><Suspense fallback={fallback}><ErrorPage/></Suspense></Route>
           <Route path="/"><Redirect to={"/all"}/></Route>
         </Switch>
       </BrowserRouter>
@@ -46,11 +49,13 @@ export default function MainPage() {
 }
 
 function MainPageErrorBoundary({children}: React.PropsWithChildren<{}>) {
-  return <ErrorBoundary renderError={<ErrorPage
-      message={"App failed to load."}
-      hideButton
-      fullPage
-  />}>
+  return <ErrorBoundary renderError={<Suspense fallback={<></>}>
+    <ErrorPage
+        message={"App failed to load."}
+        hideButton
+        fullPage
+    />
+  </Suspense>}>
     {children}
   </ErrorBoundary>
 }

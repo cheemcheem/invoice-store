@@ -7,6 +7,7 @@ import dev.cheem.projects.invoicestore.model.InvoiceDetails;
 import dev.cheem.projects.invoicestore.repository.InvoiceDetailsRepository;
 import dev.cheem.projects.invoicestore.util.LocalDateTimeConverter;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -189,4 +190,31 @@ public class InvoiceDetailsStorageService {
 
     return true;
   }
+
+  public Optional<String> getInvoiceCSV(Long invoiceUserId) {
+    log.info("InvoiceDetailsStorageService.getInvoiceCSV");
+    log.debug("invoiceUserId = " + invoiceUserId);
+
+    var csvBuilder = new StringBuilder();
+
+    invoiceDetailsRepository.findAll().stream()
+        .filter(i -> Objects.equals(i.getInvoiceUser().getUserId(), invoiceUserId))
+        .filter(Predicate.not(InvoiceDetails::getInvoiceArchived))
+        .sorted(Comparator.comparingLong(value -> value.getInvoiceDate().getTime()))
+        .forEachOrdered(invoiceDetails -> csvBuilder.append('\r').append('\n')
+            .append(invoiceDetails.getInvoiceDetailsId()).append(',')
+            .append(invoiceDetails.getInvoiceDate()).append(',')
+            .append(invoiceDetails.getInvoiceName()).append(',')
+            .append(invoiceDetails.getInvoiceTotalVAT()).append(',')
+            .append(invoiceDetails.getInvoiceTotal()));
+
+    if (csvBuilder.length() == 0) {
+      return Optional.empty();
+    }
+
+    var headers = "Invoice Id, Invoice Date, Invoice Name, Invoice Total VAT, Invoice Total";
+    return Optional.of(csvBuilder.insert(0, headers).toString());
+
+  }
+
 }

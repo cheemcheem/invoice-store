@@ -7,6 +7,8 @@ import dev.cheem.projects.invoicestore.service.InvoiceDetailsStorageService;
 import dev.cheem.projects.invoicestore.service.InvoiceFileStorageService;
 import dev.cheem.projects.invoicestore.service.UserService;
 import dev.cheem.projects.invoicestore.util.Constants;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +17,7 @@ import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -125,6 +128,23 @@ public class InvoiceController {
             "attachment; filename=\"" + invoice.getFileName() + "\"")
         .body(
             new ByteArrayResource(invoice.getData().getBytes(1, (int) invoice.getData().length())));
+  }
+
+  @GetMapping("/csv")
+  public ResponseEntity<Resource> getInvoiceCSV(
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
+  ) {
+    log.info("InvoiceUploadController.getInvoiceList");
+    var csvData = invoiceDetailsStorageService.getInvoiceCSV(invoiceUserId);
+
+    if (csvData.isEmpty()) {
+      return ResponseEntity.noContent().build();
+    }
+
+    return ResponseEntity.ok()
+        .contentType(MediaType.TEXT_PLAIN)
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"InvoiceData.csv\"")
+        .body(new ByteArrayResource(csvData.get().getBytes()));
   }
 
   @GetMapping("/all")

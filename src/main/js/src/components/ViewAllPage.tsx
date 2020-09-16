@@ -1,12 +1,63 @@
 import Page from "./common/Page";
-import React from "react";
+import React, {useCallback, useMemo} from "react";
 import ViewAll from "./viewAll/ViewAll";
 import {ViewAllProps} from "./viewAll/ViewAll";
-import AppBarCreateButton from "./common/AppBarCreateButton";
+import AppBarMoreButton from "./common/AppBarMoreButton";
+import useRedirect from "../hooks/useRedirect";
+import {useSnackbar} from "notistack";
+import download from "downloadjs";
+import AddIcon from "@material-ui/icons/Add";
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 export default function ViewAllPage(props: ViewAllProps) {
-  const title = props.archived ? "View Archived Invoices" : "View All Invoices"
-  return <Page title={title} buttons={<AppBarCreateButton/>}>
+  const title = props.archived ? "Archive" : "Active Invoices";
+  const {enqueueSnackbar, closeSnackbar} = useSnackbar();
+  const {component, triggerRedirect} = useRedirect();
+
+  const downloadCSV = useCallback(() => {
+    const key = enqueueSnackbar("Starting download...", {variant: "info", persist: true})
+    fetch(`/api/invoice/csv`)
+    .then(response => {
+      if (response.status === 204) {
+        closeSnackbar(key);
+        enqueueSnackbar("No records.", {variant: "info"});
+      } else if (response.status === 200) {
+        response.blob()
+        .then(blob => {
+          download(blob, response.headers
+          .get("Content-Disposition")!
+          .split(`attachment; filename="`)[1]
+          .split(`"`)[0])
+        })
+        .then(() => {
+          closeSnackbar(key);
+          enqueueSnackbar("Download complete.", {variant: "success"});
+        })
+      } else {
+        throw new Error("Invalid status code.");
+      }
+    })
+    .catch(() => {
+      closeSnackbar(key);
+      enqueueSnackbar("Failed to download.", {variant: "error"});
+    })
+  }, [enqueueSnackbar, closeSnackbar]);
+
+  const buttons = useMemo(() => {
+    if (props.archived) {
+      return <></>;
+    }
+    const options = [
+      {option: "Create", icon: <AddIcon/>, onClick: () => triggerRedirect("/new")},
+      {option: "Export (CSV)", icon: <GetAppIcon/>, onClick: downloadCSV},
+    ]
+    return <>
+      <AppBarMoreButton options={options}/>
+    </>
+  }, [triggerRedirect, downloadCSV, props.archived]);
+
+  return <Page title={title} buttons={buttons}>
     {ViewAll(props)}
+    {component}
   </Page>;
 }
