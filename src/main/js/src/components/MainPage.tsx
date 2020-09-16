@@ -17,7 +17,7 @@ const useStyles = makeStyles(() =>
     createStyles({
       root: {
         flexGrow: 1,
-        height: "100vh",
+        height: window.innerHeight,
         overflowY: "hidden"
       },
       main: {
