@@ -9,7 +9,7 @@ export default function ViewPage() {
   const {invoiceId} = useParams();
   const [refresh, triggerRefresh] = useState({});
   const invoice = useInvoice(invoiceId, refresh);
-  return <Page title="View Invoice" buttons={<AppBarBackButton
+  return <Page title={`View ${invoice?.invoiceName ?? ""}`} buttons={<AppBarBackButton
       archived={invoice ? invoice.invoiceArchived : undefined}/>}>
     <View invoice={invoice} triggerRefresh={triggerRefresh}/>
   </Page>

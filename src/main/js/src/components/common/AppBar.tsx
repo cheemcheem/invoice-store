@@ -3,13 +3,16 @@ import {Route, Switch} from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
 import * as MuiAppBar from "@material-ui/core/AppBar";
 import React, {ReactNode} from "react";
-import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
+import {createStyles, makeStyles} from "@material-ui/core/styles";
 import MainPageDrawer from "./appBar/MainPageDrawer";
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
     createStyles({
       title: {
         flexGrow: 1,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
       },
     })
 )
