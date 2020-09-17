@@ -38,7 +38,7 @@ export default function MainPage() {
           <AuthRoute path="/archived"><Suspense fallback={fallback}><ViewAllPage archived/></Suspense></AuthRoute>
           <AuthRoute path="/new"><Suspense fallback={fallback}><CreatePage/></Suspense></AuthRoute>
           <AuthRoute path="/logout"><Suspense fallback={fallback}><LogoutPage/></Suspense></AuthRoute>
-          <Route path="/view/:invoiceId"><Suspense fallback={fallback}><ViewPage/></Suspense></Route>
+          <AuthRoute path="/view/:invoiceId"><Suspense fallback={fallback}><ViewPage/></Suspense></AuthRoute>
           <Route path="/login"><Suspense fallback={fallback}><LoginPage/></Suspense></Route>
           <Route path="/error"><Suspense fallback={fallback}><ErrorPage/></Suspense></Route>
           <Route path="/"><Redirect to={"/all"}/></Route>
