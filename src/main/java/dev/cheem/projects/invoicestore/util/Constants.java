@@ -14,6 +14,13 @@ public class Constants {
   public static final Predicate<String> DO_NOT_INTERCEPT = Pattern.compile(
       "(/api/user)"
           + "|(/static/.*)"
-          + "|(/[^/]*)"
+          + "|(/login/.*)"
+          + "|(/logout/.*)"
+          + "|(/new/.*)"
+          + "|(/all/.*)"
+          + "|(/archived/.*)"
+          + "|(/view/.*)"
+          + "|(/index.html)"
+          + "|(/)"
   ).asMatchPredicate();
 }

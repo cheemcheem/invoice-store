@@ -130,7 +130,7 @@ public class InvoiceController {
             new ByteArrayResource(invoice.getData().getBytes(1, (int) invoice.getData().length())));
   }
 
-  @GetMapping("/csv")
+  @GetMapping(value = "/csv", produces = "text/csv")
   public ResponseEntity<Resource> getInvoiceCSV(
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
@@ -142,7 +142,6 @@ public class InvoiceController {
     }
 
     return ResponseEntity.ok()
-        .contentType(MediaType.TEXT_PLAIN)
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"InvoiceData.csv\"")
         .body(new ByteArrayResource(csvData.get().getBytes()));
   }
