@@ -49,6 +49,7 @@ public class InvoiceController {
   private final InvoiceFileStorageService invoiceFileStorageService;
   private final InvoiceDetailsStorageService invoiceDetailsStorageService;
 
+  @Transactional
   @PostMapping("/new")
   public ResponseEntity<String> uploadInvoice(
       @RequestParam("invoiceDate") @DateTimeFormat(iso = ISO.DATE) Date invoiceDate,
