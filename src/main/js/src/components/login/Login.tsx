@@ -6,6 +6,7 @@ import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import {Skeleton} from "@material-ui/lab";
 import useLoggedIn from "../../hooks/useLoggedIn";
 import {Redirect} from "react-router-dom";
+import GoogleButton from 'react-google-button'
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -15,6 +16,7 @@ const useStyles = makeStyles((theme: Theme) =>
         overflowY: "hidden",
       },
       button: {
+        backgroundColor: theme.palette.primary.main + "!important",
         width: window.innerWidth - theme.spacing(4),
       },
       title: {
@@ -56,11 +58,8 @@ export default function Login() {
           alignItems="center">
       <Paper className={classes.paper}>
         {(loggedIn === false)
-            ? <Button variant="contained"
-                      color="primary"
-                      size="large"
-                      onClick={() => window.location.href = href}
-                      className={classes.button}>Log in with Google (OAuth2)</Button>
+            ? <GoogleButton onClick={() => window.location.href = href}
+                      className={classes.button}>Log in with Google (OAuth2)</GoogleButton>
             : <Skeleton className={classes.button} variant="rect" animation="wave"/>
         }
       </Paper>
