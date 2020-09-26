@@ -7,8 +7,6 @@ import dev.cheem.projects.invoicestore.service.InvoiceDetailsStorageService;
 import dev.cheem.projects.invoicestore.service.InvoiceFileStorageService;
 import dev.cheem.projects.invoicestore.service.UserService;
 import dev.cheem.projects.invoicestore.util.Constants;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +15,6 @@ import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -63,10 +60,14 @@ public class InvoiceController {
     log.info("InvoiceUploadController.uploadInvoice");
     try {
       var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
-      var storedInvoice = invoiceDetailsStorageService
-          .storeInvoice(invoiceDate, invoiceName, invoiceTotalVAT, invoiceTotal,
-              storedInvoiceFileId,
-              invoiceUserId);
+      var storedInvoice = invoiceDetailsStorageService.storeInvoice(
+          invoiceDate,
+          invoiceName,
+          invoiceTotalVAT,
+          invoiceTotal,
+          storedInvoiceFileId,
+          invoiceUserId
+      );
       var invoiceLocationURI = ServletUriComponentsBuilder.fromPath("/view/")
           .path(storedInvoice.getInvoiceDetailsId().toString())
           .build().toUri();
@@ -107,9 +108,8 @@ public class InvoiceController {
   ) {
     log.info("InvoiceUploadController.getInvoiceFile");
     log.debug("invoiceFileId = " + invoiceFileId);
-    var invoiceFileIdLong = NumberUtils.parseNumber(invoiceFileId, Long.class);
 
-    var invoiceForUser = userService.fileMatches(invoiceUserId, invoiceFileIdLong);
+    var invoiceForUser = userService.fileMatches(invoiceUserId, invoiceFileId);
 
     if (!invoiceForUser) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

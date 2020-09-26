@@ -37,7 +37,7 @@ public class InvoiceDetailsStorageService {
 
   @Transactional
   public InvoiceDetails storeInvoice(Date invoiceDate, String invoiceName,
-      BigDecimal invoiceTotalVAT, BigDecimal invoiceTotal, @Nullable Long invoiceFileId,
+      BigDecimal invoiceTotalVAT, BigDecimal invoiceTotal, @Nullable String invoiceFileId,
       Long invoiceUserId) {
     log.info("InvoiceDetailsStorageService.storeInvoice");
 
@@ -47,9 +47,7 @@ public class InvoiceDetailsStorageService {
     invoice.setInvoiceTotalVAT(invoiceTotalVAT);
     invoice.setInvoiceTotal(invoiceTotal);
     if (Objects.nonNull(invoiceFileId)) {
-      invoice.setInvoiceFile(
-          invoiceFileStorageService.getDefiniteFile(String.valueOf(invoiceFileId))
-      );
+      invoice.setInvoiceFile(invoiceFileId);
     }
     invoice.setInvoiceArchived(false);
     invoice.setInvoiceUser(userService.getUser(invoiceUserId));
@@ -88,10 +86,7 @@ public class InvoiceDetailsStorageService {
       return Optional.of(invoiceDetailsDTO);
     }
 
-    var invoiceFileDTO = new InvoiceFileDTO();
-    invoiceFileDTO.setInvoiceFileId(invoiceDetails.getInvoiceFile().getInvoiceFileId().toString());
-    invoiceFileDTO.setInvoiceFileType(invoiceDetails.getInvoiceFile().getFileType());
-    invoiceFileDTO.setInvoiceFileName(invoiceDetails.getInvoiceFile().getFileName());
+    var invoiceFileDTO = invoiceFileStorageService.getDefiniteFileDetails(invoiceDetails.getInvoiceFile());
 
     invoiceDetailsDTO.setInvoiceFile(invoiceFileDTO);
 

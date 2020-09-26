@@ -1,18 +1,15 @@
 package dev.cheem.projects.invoicestore.service;
 
+import dev.cheem.projects.invoicestore.dto.InvoiceFileDTO;
 import dev.cheem.projects.invoicestore.exception.StorageException;
 import dev.cheem.projects.invoicestore.model.InvoiceFile;
-import dev.cheem.projects.invoicestore.repository.InvoiceFileRepository;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
-import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.engine.jdbc.BlobProxy;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,11 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class InvoiceFileStorageService {
 
-  private final InvoiceFileRepository invoiceFileRepository;
-
+  private final AWSService awsService;
 
   @Nullable
-  public Long storeFile(MultipartFile file) {
+  public String storeFile(MultipartFile file) {
     log.info("InvoiceFileStorageService.storeFile");
     if (Objects.isNull(file)) {
       return null;
@@ -50,42 +46,27 @@ public class InvoiceFileStorageService {
       throw new StorageException("File name contains invalid path sequence: '" + fileName + "' .");
     }
 
-    var invoiceFile = new InvoiceFile();
-    invoiceFile.setFileName(fileName);
-    invoiceFile.setFileType(file.getContentType());
-
     try {
-      invoiceFile.setData(BlobProxy.generateProxy(file.getBytes()));
+      return awsService.storeFile(fileName, file.getContentType(), file.getBytes());
     } catch (IOException e) {
       throw new StorageException("Failed to get data from uploaded file.", e);
     }
-
-    return invoiceFileRepository.save(invoiceFile).getInvoiceFileId();
-
   }
 
-  @Transactional
   public Optional<InvoiceFile> getFile(String invoiceFileId) {
     log.info("InvoiceFileStorageService.getFile");
     log.debug("invoiceFileId = " + invoiceFileId);
 
-    var invoiceFileIdLong = NumberUtils.parseNumber(invoiceFileId, Long.class);
-    var optionalInvoiceFile = invoiceFileRepository.findById(invoiceFileIdLong);
+    return awsService.getFile(invoiceFileId);
 
-    if (optionalInvoiceFile.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var invoiceFile = optionalInvoiceFile.get();
-    log.debug("invoiceFile = {}", invoiceFile);
-
-    return optionalInvoiceFile;
   }
 
-  public InvoiceFile getDefiniteFile(String invoiceFileId) {
-    //noinspection OptionalGetWithoutIsPresent
-    return getFile(invoiceFileId).get();
+  public InvoiceFileDTO getDefiniteFileDetails(String invoiceFileId) {
+    return getFileDetails(invoiceFileId).orElseThrow(StorageException::new);
   }
 
 
+  public Optional<InvoiceFileDTO> getFileDetails(String invoiceFileId) {
+    return awsService.getFileDetails(invoiceFileId);
+  }
 }

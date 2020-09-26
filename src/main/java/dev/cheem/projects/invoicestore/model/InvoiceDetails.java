@@ -41,9 +41,8 @@ public class InvoiceDetails {
   @Column(nullable = false)
   private BigDecimal invoiceTotalVAT;
 
-  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @Nullable
-  private InvoiceFile invoiceFile;
+  private String invoiceFile;
 
   @Column(nullable = false)
   private Boolean invoiceArchived;

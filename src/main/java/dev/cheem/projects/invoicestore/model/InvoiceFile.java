@@ -13,23 +13,15 @@ import javax.persistence.Lob;
 import lombok.Data;
 import lombok.ToString;
 
-@ToString(exclude = {"data"})
 @Data
-@Entity
 public class InvoiceFile {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(nullable = false)
-  private Long invoiceFileId;
+  private String invoiceFileId;
 
-  @Column(nullable = false)
   private String fileName;
 
-  @Column(nullable = false)
   private String fileType;
 
-  @Basic(fetch = LAZY)
   private Blob data;
 
 }
