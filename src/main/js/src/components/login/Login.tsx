@@ -1,7 +1,6 @@
 import React, {useMemo} from "react";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import {Skeleton} from "@material-ui/lab";
 import useLoggedIn from "../../hooks/useLoggedIn";
@@ -59,7 +58,7 @@ export default function Login() {
       <Paper className={classes.paper}>
         {(loggedIn === false)
             ? <GoogleButton onClick={() => window.location.href = href}
-                      className={classes.button}>Log in with Google (OAuth2)</GoogleButton>
+                            className={classes.button}>Log in with Google (OAuth2)</GoogleButton>
             : <Skeleton className={classes.button} variant="rect" animation="wave"/>
         }
       </Paper>
