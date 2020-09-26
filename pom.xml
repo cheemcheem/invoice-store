@@ -57,10 +57,27 @@
       <artifactId>spring-boot-starter-oauth2-client</artifactId>
       <groupId>org.springframework.boot</groupId>
     </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+    </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${aws.java.sdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <properties>
     <github.username>cheemcheem</github.username>
+    <aws.java.sdk.version>2.14.21</aws.java.sdk.version>
   </properties>
 
 </project>

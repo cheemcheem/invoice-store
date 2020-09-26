@@ -56,12 +56,11 @@ public class UserService {
 
 
   @Transactional
-  public boolean fileMatches(Long userId, Long invoiceFileIdLong) {
+  public boolean fileMatches(Long userId, String invoiceFileId) {
     return userRepository.getOne(userId)
         .getInvoiceDetailsSet().stream()
         .map(InvoiceDetails::getInvoiceFile)
         .filter(Objects::nonNull)
-        .map(InvoiceFile::getInvoiceFileId)
-        .anyMatch(invoiceFileIdLong::equals);
+        .anyMatch(invoiceFileId::equals);
   }
 }
