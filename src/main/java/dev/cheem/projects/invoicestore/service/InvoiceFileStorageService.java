@@ -1,6 +1,6 @@
 package dev.cheem.projects.invoicestore.service;
 
-import dev.cheem.projects.invoicestore.dto.InvoiceFileDTO;
+import dev.cheem.projects.invoicestore.dto.InvoiceFileDetailsDTO;
 import dev.cheem.projects.invoicestore.exception.StorageException;
 import dev.cheem.projects.invoicestore.model.InvoiceFile;
 import java.io.IOException;
@@ -61,12 +61,12 @@ public class InvoiceFileStorageService {
 
   }
 
-  public InvoiceFileDTO getDefiniteFileDetails(String invoiceFileId) {
+  public InvoiceFileDetailsDTO getDefiniteFileDetails(String invoiceFileId) {
     return getFileDetails(invoiceFileId).orElseThrow(StorageException::new);
   }
 
 
-  public Optional<InvoiceFileDTO> getFileDetails(String invoiceFileId) {
+  public Optional<InvoiceFileDetailsDTO> getFileDetails(String invoiceFileId) {
     return awsService.getFileDetails(invoiceFileId);
   }
 }

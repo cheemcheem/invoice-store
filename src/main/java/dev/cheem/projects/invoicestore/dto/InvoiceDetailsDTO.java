@@ -16,7 +16,7 @@ public class InvoiceDetailsDTO {
 
   private BigDecimal invoiceTotal;
 
-  private InvoiceFileDTO invoiceFile;
+  private InvoiceFileDetailsDTO invoiceFile;
 
   private Boolean invoiceArchived;
 

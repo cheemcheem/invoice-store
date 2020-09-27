@@ -1,9 +1,10 @@
 package dev.cheem.projects.invoicestore.service;
 
 import dev.cheem.projects.invoicestore.config.AWSConfig.AWSInstance;
-import dev.cheem.projects.invoicestore.dto.InvoiceFileDTO;
+import dev.cheem.projects.invoicestore.dto.InvoiceFileDetailsDTO;
 import dev.cheem.projects.invoicestore.exception.StorageException;
 import dev.cheem.projects.invoicestore.model.InvoiceFile;
+import dev.cheem.projects.invoicestore.model.InvoiceFileDetails;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
@@ -48,14 +49,18 @@ public class AWSService {
     var fileType = object.response().contentType();
     var fileName = object.response().metadata().get(awsInstance.getS3FileNameMetaTag());
 
+    var invoiceFileDetails = new InvoiceFileDetails();
+    invoiceFileDetails.setFileName(fileName);
+    invoiceFileDetails.setFileType(fileType);
+
     var invoiceFile = new InvoiceFile();
+    invoiceFile.setInvoiceFileDetails(invoiceFileDetails);
     invoiceFile.setData(BlobProxy.generateProxy(bytes));
-    invoiceFile.setFileName(fileName);
-    invoiceFile.setFileType(fileType);
+
     return Optional.of(invoiceFile);
   }
 
-  public Optional<InvoiceFileDTO> getFileDetails(String uuid) {
+  public Optional<InvoiceFileDetailsDTO> getFileDetails(String uuid) {
     var key = getKey(uuid);
     var getRequest = awsInstance.getGetS3ObjectRequestBuilder()
         .key(key)
@@ -71,15 +76,17 @@ public class AWSService {
 
     var fileType = object.response().contentType();
     System.out.println("object.response().metadata() = " + object.response().metadata());
-    System.out.println("object.response().metadata().get(awsInstance.getS3FileNameMetaTag()) = " + object.response().metadata().get(awsInstance.getS3FileNameMetaTag()));
-    System.out.println("object.response().getValueForField(awsInstance.getS3FileNameMetaTag(), String.class) = "
-        + object.response().getValueForField(awsInstance.getS3FileNameMetaTag(), String.class));
+    System.out.println(
+        "object.response().metadata().get(awsInstance.getS3FileNameMetaTag()) = " + object
+            .response().metadata().get(awsInstance.getS3FileNameMetaTag()));
+    System.out.println(
+        "object.response().getValueForField(awsInstance.getS3FileNameMetaTag(), String.class) = "
+            + object.response().getValueForField(awsInstance.getS3FileNameMetaTag(), String.class));
     var fileName = object.response().metadata().get(awsInstance.getS3FileNameMetaTag());
 
-    var invoiceFile = new InvoiceFileDTO();
+    var invoiceFile = new InvoiceFileDetailsDTO();
     invoiceFile.setInvoiceFileName(fileName);
     invoiceFile.setInvoiceFileType(fileType);
-    invoiceFile.setInvoiceFileId(uuid);
     return Optional.of(invoiceFile);
   }
 

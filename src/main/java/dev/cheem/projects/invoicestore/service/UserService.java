@@ -2,7 +2,6 @@ package dev.cheem.projects.invoicestore.service;
 
 import dev.cheem.projects.invoicestore.dto.UserDTO;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
-import dev.cheem.projects.invoicestore.model.InvoiceFile;
 import dev.cheem.projects.invoicestore.model.User;
 import dev.cheem.projects.invoicestore.repository.UserRepository;
 import java.util.Objects;
@@ -56,11 +55,11 @@ public class UserService {
 
 
   @Transactional
-  public boolean fileMatches(Long userId, String invoiceFileId) {
+  public boolean detailsMatch(Long userId, Long invoiceDetailsId) {
     return userRepository.getOne(userId)
         .getInvoiceDetailsSet().stream()
-        .map(InvoiceDetails::getInvoiceFile)
+        .map(InvoiceDetails::getInvoiceDetailsId)
         .filter(Objects::nonNull)
-        .anyMatch(invoiceFileId::equals);
+        .anyMatch(invoiceDetailsId::equals);
   }
 }

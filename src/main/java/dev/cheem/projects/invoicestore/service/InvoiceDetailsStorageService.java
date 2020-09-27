@@ -2,7 +2,6 @@ package dev.cheem.projects.invoicestore.service;
 
 import dev.cheem.projects.invoicestore.dto.BasicInvoiceDetailsDTO;
 import dev.cheem.projects.invoicestore.dto.InvoiceDetailsDTO;
-import dev.cheem.projects.invoicestore.dto.InvoiceFileDTO;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
 import dev.cheem.projects.invoicestore.repository.InvoiceDetailsRepository;
 import dev.cheem.projects.invoicestore.util.LocalDateTimeConverter;
@@ -212,4 +211,11 @@ public class InvoiceDetailsStorageService {
 
   }
 
+  public Optional<String> getInvoiceFileId(Long invoiceDetailsId) {
+    var invoiceDetails = invoiceDetailsRepository.findById(invoiceDetailsId);
+    if (invoiceDetails.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(invoiceDetails.get().getInvoiceFile());
+  }
 }
