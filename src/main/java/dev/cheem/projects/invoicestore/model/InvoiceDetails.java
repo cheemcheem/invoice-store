@@ -2,20 +2,18 @@ package dev.cheem.projects.invoicestore.model;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.lang.Nullable;
 
 @ToString(exclude = {"invoiceUser"})
@@ -26,8 +24,12 @@ import org.springframework.lang.Nullable;
 public class InvoiceDetails {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long invoiceDetailsId;
+  @GeneratedValue(generator = "UUID")
+  @GenericGenerator(
+      name = "UUID",
+      strategy = "org.hibernate.id.UUIDGenerator"
+  )
+  private String invoiceDetailsId;
 
   @Column(nullable = false)
   private Date invoiceDate;

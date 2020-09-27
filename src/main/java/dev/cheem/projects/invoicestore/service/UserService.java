@@ -55,7 +55,7 @@ public class UserService {
 
 
   @Transactional
-  public boolean detailsMatch(Long userId, Long invoiceDetailsId) {
+  public boolean detailsMatch(Long userId, String invoiceDetailsId) {
     return userRepository.getOne(userId)
         .getInvoiceDetailsSet().stream()
         .map(InvoiceDetails::getInvoiceDetailsId)

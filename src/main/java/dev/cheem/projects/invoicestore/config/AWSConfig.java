@@ -2,7 +2,6 @@ package dev.cheem.projects.invoicestore.config;
 
 import java.net.URI;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,6 +76,7 @@ public class AWSConfig {
 
   @Data
   public static class AWSInstance {
+
     private final S3Client S3Client;
     private final GetObjectRequest.Builder getS3ObjectRequestBuilder;
     private final DeleteObjectRequest.Builder deleteS3ObjectRequestBuilder;

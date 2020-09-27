@@ -56,7 +56,8 @@ public class AWSService {
     var invoiceFile = new InvoiceFile();
     invoiceFile.setInvoiceFileDetails(invoiceFileDetails);
     invoiceFile.setData(BlobProxy.generateProxy(bytes));
-
+    invoiceFile.setETag(object.response().eTag());
+    invoiceFile.setLastModified(object.response().lastModified());
     return Optional.of(invoiceFile);
   }
 
