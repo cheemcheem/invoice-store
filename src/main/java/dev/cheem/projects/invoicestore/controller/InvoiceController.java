@@ -23,7 +23,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.NumberUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -101,32 +100,38 @@ public class InvoiceController {
 
   @Transactional
   @SneakyThrows
-  @GetMapping("/file/{invoiceFileId}")
+  @GetMapping("/file/{invoiceDetailsId}")
   public ResponseEntity<Resource> getInvoiceFile(
-      @PathVariable String invoiceFileId,
+      @PathVariable Long invoiceDetailsId,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceUploadController.getInvoiceFile");
-    log.debug("invoiceFileId = " + invoiceFileId);
+    log.debug("invoiceDetailsId = " + invoiceDetailsId);
 
-    var invoiceForUser = userService.fileMatches(invoiceUserId, invoiceFileId);
+    var invoiceForUser = userService.detailsMatch(invoiceUserId, invoiceDetailsId);
 
     if (!invoiceForUser) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
-    var optional = invoiceFileStorageService.getFile(invoiceFileId);
+    var optionalFileId = invoiceDetailsStorageService.getInvoiceFileId(invoiceDetailsId);
 
-    if (optional.isEmpty()) {
+    if (optionalFileId.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var optionalFile = invoiceFileStorageService.getFile(optionalFileId.get());
+
+    if (optionalFile.isEmpty()) {
       return ResponseEntity.of(Optional.empty());
     }
 
-    var invoice = optional.get();
+    var invoice = optionalFile.get();
 
     return ResponseEntity.ok()
-        .contentType(MediaType.parseMediaType(invoice.getFileType()))
+        .contentType(MediaType.parseMediaType(invoice.getInvoiceFileDetails().getFileType()))
         .header(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + invoice.getFileName() + "\"")
+            "attachment; filename=\"" + invoice.getInvoiceFileDetails().getFileName() + "\"")
         .body(
             new ByteArrayResource(invoice.getData().getBytes(1, (int) invoice.getData().length())));
   }

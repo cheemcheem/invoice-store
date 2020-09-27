@@ -5,7 +5,6 @@ export type Invoice = {
   invoiceTotalVAT: number,
   invoiceTotal: number,
   invoiceFile?: {
-    invoiceFileId: string,
     invoiceFileName: string,
     invoiceFileType: string
   },

@@ -118,7 +118,7 @@ export default function View({invoice, triggerRefresh}: ViewProps) {
       return enqueueSnackbar("Can't download, no file.", {variant: "warning"})
     }
     const key = enqueueSnackbar("Starting download...", {variant: "info", persist: true})
-    fetch(`/api/invoice/file/${invoice?.invoiceFile?.invoiceFileId}`)
+    fetch(`/api/invoice/file/${invoice?.invoiceDetailsId}`)
     .then(response => response.blob())
     .then(blob => {
       download(blob, invoice?.invoiceFile?.invoiceFileName, invoice?.invoiceFile?.invoiceFileType)
@@ -149,7 +149,7 @@ export default function View({invoice, triggerRefresh}: ViewProps) {
           {hasFile && (canRender
               ? <>
                 <CardMedia className={classes.media}
-                           image={`/api/invoice/file/${invoice!.invoiceFile!.invoiceFileId}`}
+                           image={`/api/invoice/file/${invoice!.invoiceDetailsId!}`}
                            title={invoice!.invoiceFile!.invoiceFileName}
                            component="img"
                            alt={invoice!.invoiceFile!.invoiceFileName}
