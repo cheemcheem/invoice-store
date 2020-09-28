@@ -7,7 +7,7 @@ export default function useRedirect() {
   const triggerRedirect = useMemo(
       () =>
           (to: string) =>
-              setComponent(<Redirect to={to}/>)
+              setComponent(<Redirect push to={to}/>)
       , [setComponent]);
 
   return {component, triggerRedirect}
