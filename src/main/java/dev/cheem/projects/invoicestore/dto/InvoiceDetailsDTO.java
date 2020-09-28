@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class InvoiceDetailsDTO {
 
-  private Long invoiceDetailsId;
+  private String invoiceDetailsId;
 
   private String invoiceDate;
 

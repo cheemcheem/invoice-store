@@ -2,7 +2,6 @@ package dev.cheem.projects.invoicestore.config;
 
 import java.net.URI;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +30,10 @@ public class AWSConfig {
 
   @Value("${AWS_S3_BUCKET_ROOT}")
   private String root;
+
+  @Value("${AWS_MAX_FILE_LIMIT}")
+  private String maxFileLimit;
+
 
   private S3Client S3Client() {
     log.info("Creating S3 Client");
@@ -63,6 +66,11 @@ public class AWSConfig {
     return "original-file-name";
   }
 
+  private Integer maxFileLimit() {
+    return Integer.valueOf(maxFileLimit);
+  }
+
+
   @Bean
   public AWSInstance awsInstance() {
     return new AWSInstance(
@@ -71,17 +79,20 @@ public class AWSConfig {
         deleteS3ObjectRequestBuilder(),
         putS3ObjectRequestBuilder(),
         s3RootDirectory(),
-        s3FileNameMetaTag()
+        s3FileNameMetaTag(),
+        maxFileLimit()
     );
   }
 
   @Data
   public static class AWSInstance {
+
     private final S3Client S3Client;
     private final GetObjectRequest.Builder getS3ObjectRequestBuilder;
     private final DeleteObjectRequest.Builder deleteS3ObjectRequestBuilder;
     private final PutObjectRequest.Builder putS3ObjectRequestBuilder;
     private final String s3RootDirectory;
     private final String s3FileNameMetaTag;
+    private final Integer maxFileLimit;
   }
 }

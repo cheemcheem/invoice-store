@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.NumberUtils;
 
 @Service
 @Slf4j
@@ -59,8 +58,7 @@ public class InvoiceDetailsStorageService {
       Long invoiceUserId) {
     log.info("InvoiceDetailsStorageService.getInvoiceDetails");
     log.debug("invoiceDetailsId = " + invoiceDetailsId + ", invoiceUserId = " + invoiceUserId);
-    var invoiceDetailsIdLong = NumberUtils.parseNumber(invoiceDetailsId, Long.class);
-    var optionalDetails = invoiceDetailsRepository.findById(invoiceDetailsIdLong);
+    var optionalDetails = invoiceDetailsRepository.findById(invoiceDetailsId);
 
     if (optionalDetails.isEmpty()) {
       return Optional.empty();
@@ -85,7 +83,8 @@ public class InvoiceDetailsStorageService {
       return Optional.of(invoiceDetailsDTO);
     }
 
-    var invoiceFileDTO = invoiceFileStorageService.getDefiniteFileDetails(invoiceDetails.getInvoiceFile());
+    var invoiceFileDTO = invoiceFileStorageService
+        .getDefiniteFileDetails(invoiceDetails.getInvoiceFile());
 
     invoiceDetailsDTO.setInvoiceFile(invoiceFileDTO);
 
@@ -110,7 +109,7 @@ public class InvoiceDetailsStorageService {
         .filter(i -> Objects.equals(i.getInvoiceUser().getUserId(), invoiceUserId))
         .filter(i -> i.getInvoiceArchived().equals(archived))
         .map(invoiceDetails -> new BasicInvoiceDetailsDTO(
-            invoiceDetails.getInvoiceDetailsId().toString(),
+            invoiceDetails.getInvoiceDetailsId(),
             LocalDateTimeConverter.formatISO(invoiceDetails.getInvoiceDate()),
             invoiceDetails.getInvoiceName()
         ))
@@ -121,8 +120,7 @@ public class InvoiceDetailsStorageService {
     log.info("InvoiceDetailsStorageService.deleteInvoice");
     log.debug("invoiceDetailsId = " + invoiceDetailsId + ", invoiceUserId = " + invoiceUserId);
 
-    var invoiceDetailsIdLong = NumberUtils.parseNumber(invoiceDetailsId, Long.class);
-    var optional = invoiceDetailsRepository.findById(invoiceDetailsIdLong);
+    var optional = invoiceDetailsRepository.findById(invoiceDetailsId);
 
     if (optional.isEmpty()) {
       return Optional.empty();
@@ -139,6 +137,10 @@ public class InvoiceDetailsStorageService {
     }
 
     invoiceDetailsRepository.deleteById(invoiceDetails.getInvoiceDetailsId());
+
+    if (Objects.nonNull(invoiceDetails.getInvoiceFile())) {
+      invoiceFileStorageService.deleteById(invoiceDetails.getInvoiceFile());
+    }
     return Optional.of(true);
 
   }
@@ -160,8 +162,7 @@ public class InvoiceDetailsStorageService {
         + ", invoiceArchived = " + invoiceArchived
         + ", invoiceUserId = " + invoiceUserId);
 
-    var invoiceDetailsIdLong = NumberUtils.parseNumber(invoiceDetailsId, Long.class);
-    var optionalDetails = invoiceDetailsRepository.findById(invoiceDetailsIdLong);
+    var optionalDetails = invoiceDetailsRepository.findById(invoiceDetailsId);
 
     if (optionalDetails.isEmpty()) {
       return false;
@@ -178,7 +179,7 @@ public class InvoiceDetailsStorageService {
     var count = entityManager.createQuery(
         "update InvoiceDetails set invoiceArchived = :invoiceArchived where invoiceDetailsId = :invoiceDetailsId")
         .setParameter("invoiceArchived", invoiceArchived)
-        .setParameter("invoiceDetailsId", invoiceDetailsIdLong)
+        .setParameter("invoiceDetailsId", invoiceDetailsId)
         .executeUpdate();
     log.debug("Executed query, updated {} rows.", count);
 
@@ -211,7 +212,7 @@ public class InvoiceDetailsStorageService {
 
   }
 
-  public Optional<String> getInvoiceFileId(Long invoiceDetailsId) {
+  public Optional<String> getInvoiceFileId(String invoiceDetailsId) {
     var invoiceDetails = invoiceDetailsRepository.findById(invoiceDetailsId);
     if (invoiceDetails.isEmpty()) {
       return Optional.empty();

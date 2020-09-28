@@ -8,6 +8,7 @@ import dev.cheem.projects.invoicestore.service.InvoiceFileStorageService;
 import dev.cheem.projects.invoicestore.service.UserService;
 import dev.cheem.projects.invoicestore.util.Constants;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -57,6 +59,9 @@ public class InvoiceController {
   ) {
 
     log.info("InvoiceUploadController.uploadInvoice");
+    if (!userService.allowedMoreFiles(invoiceUserId)) {
+      return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).build();
+    }
     try {
       var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
       var storedInvoice = invoiceDetailsStorageService.storeInvoice(
@@ -68,7 +73,7 @@ public class InvoiceController {
           invoiceUserId
       );
       var invoiceLocationURI = ServletUriComponentsBuilder.fromPath("/view/")
-          .path(storedInvoice.getInvoiceDetailsId().toString())
+          .path(storedInvoice.getInvoiceDetailsId())
           .build().toUri();
 
       return ResponseEntity.status(HttpStatus.SEE_OTHER).location(invoiceLocationURI).build();
@@ -102,7 +107,7 @@ public class InvoiceController {
   @SneakyThrows
   @GetMapping("/file/{invoiceDetailsId}")
   public ResponseEntity<Resource> getInvoiceFile(
-      @PathVariable Long invoiceDetailsId,
+      @PathVariable String invoiceDetailsId,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
     log.info("InvoiceUploadController.getInvoiceFile");
@@ -131,9 +136,16 @@ public class InvoiceController {
     return ResponseEntity.ok()
         .contentType(MediaType.parseMediaType(invoice.getInvoiceFileDetails().getFileType()))
         .header(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + invoice.getInvoiceFileDetails().getFileName() + "\"")
-        .body(
-            new ByteArrayResource(invoice.getData().getBytes(1, (int) invoice.getData().length())));
+            "attachment; filename=\""
+                + invoice.getInvoiceFileDetails().getFileName()
+                + "\""
+        )
+        .eTag(invoice.getETag())
+        .lastModified(invoice.getLastModified())
+        .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic())
+        .body(new ByteArrayResource(
+            invoice.getData().getBytes(1, (int) invoice.getData().length()))
+        );
   }
 
   @GetMapping(value = "/csv", produces = "text/csv")

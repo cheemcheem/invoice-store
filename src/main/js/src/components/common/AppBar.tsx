@@ -5,6 +5,7 @@ import * as MuiAppBar from "@material-ui/core/AppBar";
 import React, {ReactNode} from "react";
 import {createStyles, makeStyles} from "@material-ui/core/styles";
 import MainPageDrawer from "./appBar/MainPageDrawer";
+import useLoggedIn from "../../hooks/useLoggedIn";
 
 const useStyles = makeStyles(() =>
     createStyles({
@@ -23,13 +24,13 @@ export type MainPageAppBarProps = {
 
 export default function AppBar({title, buttons}: MainPageAppBarProps) {
   const classes = useStyles();
-
+  const loggedIn = useLoggedIn();
   return <>
     <MuiAppBar.default position="static">
       <Toolbar>
         <Switch>
-          <Route path={["/error", "/login", "/logout"]}/>
-          <Route><MainPageDrawer/></Route>
+          <Route path={["/error", "/logout"]}/>
+          <Route><MainPageDrawer loggedIn={loggedIn === "not checked" ? false : loggedIn}/></Route>
         </Switch>
         <Typography variant="h6" className={classes.title}>
           {title}
