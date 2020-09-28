@@ -40,7 +40,7 @@ An invoice manager. This was created to solve a problem of mine, it can be used 
         - `debug`enables debug output
         - `debug-spring`enables debug output for spring
         - `debug-all` enables debug output on root logger
-    - SERVER_PORT=Port to run application on
+    - `SERVER_PORT` Port to run application on
 3. Run `java -jar target/invoice-store.jar`
 
 ### Next steps
