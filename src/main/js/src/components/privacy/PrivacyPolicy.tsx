@@ -23,7 +23,8 @@ const useStyles = makeStyles((theme: Theme) =>
     createStyles({
       root: {
         height: window.innerHeight - theme.spacing(8),
-        overflowY: "scroll"
+        overflowY: "scroll",
+        overflowX: "hidden"
       },
       list: {
         boxSizing: "border-box",
@@ -76,7 +77,14 @@ export default function PrivacyPolicy() {
         <List className={classes.tldr}>
           <ListItem className={classes.tldr}>
             <ListItemText
-                primary="Cookies are used to identify you and prevent cross site scripting attacks."/>
+                primary={<>
+                  <span>Cookies are used to identify you and prevent </span>
+                  <Link href="https://owasp.org/www-community/attacks/csrf"
+                        title="OWASP: Cross Site Request Forgery">
+                    XSRF
+                  </Link>
+                  <span> attacks.</span>
+                </>}/>
           </ListItem>
           <ListItem className={classes.tldr}>
             <ListItemText primary="The only data we store about you are:"/>
