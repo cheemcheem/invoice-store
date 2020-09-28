@@ -19,7 +19,8 @@ public class GeneralWebSecurity extends WebSecurityConfigurerAdapter {
         .authorizeRequests(a -> a
             .antMatchers("/**/*.{js,html,css,ico,png,webmanifest,svg,xml}").permitAll()
             .antMatchers("/", "/error").permitAll()
-            .antMatchers("/login", "/all", "/view/**/*", "/new", "/archived").permitAll()
+            .antMatchers("/login", "/all", "/view/**/*", "/new", "/archived", "/privacy")
+            .permitAll()
             .antMatchers("/api/user").permitAll()
             .anyRequest().authenticated()
         )

@@ -31,6 +31,10 @@ public class AWSConfig {
   @Value("${AWS_S3_BUCKET_ROOT}")
   private String root;
 
+  @Value("${AWS_MAX_FILE_LIMIT}")
+  private String maxFileLimit;
+
+
   private S3Client S3Client() {
     log.info("Creating S3 Client");
     var s3Client = S3Client.builder()
@@ -62,6 +66,11 @@ public class AWSConfig {
     return "original-file-name";
   }
 
+  private Integer maxFileLimit() {
+    return Integer.valueOf(maxFileLimit);
+  }
+
+
   @Bean
   public AWSInstance awsInstance() {
     return new AWSInstance(
@@ -70,7 +79,8 @@ public class AWSConfig {
         deleteS3ObjectRequestBuilder(),
         putS3ObjectRequestBuilder(),
         s3RootDirectory(),
-        s3FileNameMetaTag()
+        s3FileNameMetaTag(),
+        maxFileLimit()
     );
   }
 
@@ -83,5 +93,6 @@ public class AWSConfig {
     private final PutObjectRequest.Builder putS3ObjectRequestBuilder;
     private final String s3RootDirectory;
     private final String s3FileNameMetaTag;
+    private final Integer maxFileLimit;
   }
 }

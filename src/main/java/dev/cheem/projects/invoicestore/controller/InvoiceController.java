@@ -59,6 +59,9 @@ public class InvoiceController {
   ) {
 
     log.info("InvoiceUploadController.uploadInvoice");
+    if (!userService.allowedMoreFiles(invoiceUserId)) {
+      return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).build();
+    }
     try {
       var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
       var storedInvoice = invoiceDetailsStorageService.storeInvoice(

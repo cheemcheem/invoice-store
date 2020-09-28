@@ -4,12 +4,14 @@ import static dev.cheem.projects.invoicestore.util.Constants.DO_NOT_INTERCEPT;
 
 import dev.cheem.projects.invoicestore.service.UserService;
 import dev.cheem.projects.invoicestore.util.Constants;
+import java.io.IOException;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.NumberUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -24,7 +26,7 @@ public class OAuthInterceptor implements HandlerInterceptor {
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-      Object handler) {
+      Object handler) throws IOException {
     log.debug("OAuthInterceptor.preHandle");
     log.debug(request.getServletPath());
 
@@ -46,6 +48,12 @@ public class OAuthInterceptor implements HandlerInterceptor {
 
       if (Objects.isNull(principal.getName())) {
         log.debug("User id in principal is null.");
+        return false;
+      }
+
+      if (!userService.allowedMoreUsers()) {
+        log.warn("Max user limit reached.");
+        response.sendError(HttpStatus.INSUFFICIENT_STORAGE.value(), "Too many users registered.");
         return false;
       }
 

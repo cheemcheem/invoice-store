@@ -114,4 +114,9 @@ public class AWSService {
     awsInstance.getS3Client().putObject(putRequest, RequestBody.fromBytes(fileBytes));
     return uuid;
   }
+
+  public Integer maxFileLimit() {
+    return awsInstance.getMaxFileLimit();
+  }
+
 }

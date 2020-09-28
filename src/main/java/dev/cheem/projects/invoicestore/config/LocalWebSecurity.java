@@ -24,7 +24,8 @@ public class LocalWebSecurity extends WebSecurityConfigurerAdapter {
         .authorizeRequests(a -> a
             .antMatchers("/**/*.{js,html,css,ico,png,webmanifest,svg,xml}").permitAll()
             .antMatchers("/", "/error").permitAll()
-            .antMatchers("/login", "/all", "/view/**/*", "/new", "/archived").permitAll()
+            .antMatchers("/login", "/all", "/view/**/*", "/new", "/archived", "/privacy")
+            .permitAll()
             .antMatchers("/api/user").permitAll()
             .anyRequest().authenticated()
         )
@@ -37,7 +38,7 @@ public class LocalWebSecurity extends WebSecurityConfigurerAdapter {
                 (request, response, authentication) -> handleSuccess(request, response))
         )
         .oauth2Login(o -> o
-            .successHandler((request, response, authentication) -> handleSuccess(request, response))
+            .successHandler((rq, response, auth) -> response.sendRedirect("/"))
         )
     ;
   }
@@ -45,7 +46,7 @@ public class LocalWebSecurity extends WebSecurityConfigurerAdapter {
   private void handleSuccess(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     var referrer = request.getHeader("referer");
-    log.info("referrer '{}' ", referrer);
+    log.debug("referrer '{}' ", referrer);
     if (Objects.nonNull(referrer)) {
       var uri = URI.create(referrer);
       response.sendRedirect("http://" + uri.getHost() + ":" + uri.getPort());

@@ -1,14 +1,14 @@
 import React, {lazy, Suspense} from "react";
-import {BrowserRouter, Redirect, Route, Switch} from "react-router-dom";
+import {BrowserRouter, Route, Switch} from "react-router-dom";
 import {createStyles, makeStyles} from "@material-ui/core/styles";
 import ErrorBoundary from "./common/ErrorBoundary";
-import AuthRoute from "./main/AuthRoute";
-import {useMemo} from "react";
-import Page from "./common/Page";
+import SuspenseRoute from "./main/SuspenseRoute";
+import HomePage from "./HomePage";
 
 const CreatePage = lazy(() => import("./CreatePage"));
 const ViewPage = lazy(() => import("./ViewPage"));
 const LoginPage = lazy(() => import("./LoginPage"));
+const PrivacyPolicyPage = lazy(() => import("./PrivacyPolicyPage"));
 const LogoutPage = lazy(() => import("./LogoutPage"));
 const ErrorPage = lazy(() => import("./ErrorPage"));
 const ViewAllPage = lazy(() => import("./ViewAllPage"));
@@ -29,19 +29,20 @@ const useStyles = makeStyles(() =>
 
 export default function MainPage() {
   const classes = useStyles();
-  const fallback = useMemo(() => <Page title={""}/>, [])
+
   return <MainPageErrorBoundary>
     <div className={classes.root}>
       <BrowserRouter>
         <Switch>
-          <AuthRoute path="/all"><Suspense fallback={fallback}><ViewAllPage/></Suspense></AuthRoute>
-          <AuthRoute path="/archived"><Suspense fallback={fallback}><ViewAllPage archived/></Suspense></AuthRoute>
-          <AuthRoute path="/new"><Suspense fallback={fallback}><CreatePage/></Suspense></AuthRoute>
-          <AuthRoute path="/logout"><Suspense fallback={fallback}><LogoutPage/></Suspense></AuthRoute>
-          <AuthRoute path="/view/:invoiceId"><Suspense fallback={fallback}><ViewPage/></Suspense></AuthRoute>
-          <Route path="/login"><Suspense fallback={fallback}><LoginPage/></Suspense></Route>
-          <Route path="/error"><Suspense fallback={fallback}><ErrorPage/></Suspense></Route>
-          <Route path="/"><Redirect to={"/all"}/></Route>
+          <SuspenseRoute auth path="/all"><ViewAllPage/></SuspenseRoute>
+          <SuspenseRoute auth path="/archived"><ViewAllPage archived/></SuspenseRoute>
+          <SuspenseRoute auth path="/new"><CreatePage/></SuspenseRoute>
+          <SuspenseRoute auth path="/logout"><LogoutPage/></SuspenseRoute>
+          <SuspenseRoute auth path="/view/:invoiceId"><ViewPage/></SuspenseRoute>
+          <SuspenseRoute path="/login"><LoginPage/></SuspenseRoute>
+          <SuspenseRoute path="/privacy"><PrivacyPolicyPage/></SuspenseRoute>
+          <SuspenseRoute path="/error"><ErrorPage/></SuspenseRoute>
+          <Route path="/"><HomePage/></Route>
         </Switch>
       </BrowserRouter>
     </div>

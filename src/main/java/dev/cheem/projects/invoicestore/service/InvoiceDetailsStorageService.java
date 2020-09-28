@@ -137,6 +137,10 @@ public class InvoiceDetailsStorageService {
     }
 
     invoiceDetailsRepository.deleteById(invoiceDetails.getInvoiceDetailsId());
+
+    if (Objects.nonNull(invoiceDetails.getInvoiceFile())) {
+      invoiceFileStorageService.deleteById(invoiceDetails.getInvoiceFile());
+    }
     return Optional.of(true);
 
   }

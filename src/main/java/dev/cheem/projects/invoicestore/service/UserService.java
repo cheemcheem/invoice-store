@@ -1,5 +1,7 @@
 package dev.cheem.projects.invoicestore.service;
 
+import dev.cheem.projects.invoicestore.config.AWSConfig.AWSInstance;
+import dev.cheem.projects.invoicestore.config.DatabaseConfig.DatabaseInstance;
 import dev.cheem.projects.invoicestore.dto.UserDTO;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
 import dev.cheem.projects.invoicestore.model.User;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
 
+  private final DatabaseInstance databaseInstance;
+  private final AWSInstance awsInstance;
   private final UserRepository userRepository;
 
   @Transactional
@@ -61,5 +65,17 @@ public class UserService {
         .map(InvoiceDetails::getInvoiceDetailsId)
         .filter(Objects::nonNull)
         .anyMatch(invoiceDetailsId::equals);
+  }
+
+  public boolean allowedMoreFiles(Long userId) {
+    return userRepository.getOne(userId)
+        .getInvoiceDetailsSet().stream()
+        .map(InvoiceDetails::getInvoiceDetailsId)
+        .filter(Objects::nonNull)
+        .count() < awsInstance.getMaxFileLimit();
+  }
+
+  public boolean allowedMoreUsers() {
+    return userRepository.count() < databaseInstance.getMaxUserLimit();
   }
 }

@@ -9,6 +9,7 @@ import AddIcon from "@material-ui/icons/Add";
 import Divider from "@material-ui/core/Divider";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import IconButton from "@material-ui/core/IconButton";
+import InfoIcon from '@material-ui/icons/Info';
 import React, {useCallback, useState} from "react";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 )
 
-export default function MainPageDrawer() {
+export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
   const classes = useStyles();
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = useCallback(() => setMenuOpen(!menuOpen), [menuOpen, setMenuOpen]);
@@ -48,13 +49,24 @@ export default function MainPageDrawer() {
           <div>
             <ListSubheader color="primary">Pages</ListSubheader>
             <Divider variant="fullWidth"/>
-            <ListItemLink to="/all" primary="Invoices" icon={<DescriptionIcon/>}/>
-            <ListItemLink to="/archived" primary="Archive" icon={<ArchiveIcon/>}/>
-            <ListItemLink to="/new" primary="Create" icon={<AddIcon/>}/>
-            <Divider variant="fullWidth"/>
+            {loggedIn && <>
+              <ListItemLink to="/all" primary="Invoices" icon={<DescriptionIcon/>}/>
+              <ListItemLink to="/archived" primary="Archive" icon={<ArchiveIcon/>}/>
+              <ListItemLink to="/new" primary="Create" icon={<AddIcon/>}/>
+              <Divider variant="fullWidth"/>
+            </>}
           </div>
           <div>
-            <ListItemLink to="/logout" primary="Logout" icon={<ExitToAppIcon/>}/>
+            <ListItemLink to="/privacy" primary="Privacy Policy" icon={<InfoIcon/>}/>
+            {loggedIn
+                ? <>
+                  <Divider variant="fullWidth"/>
+                  <ListItemLink to="/logout" primary="Logout" icon={<ExitToAppIcon/>}/>
+                </>
+                : <>
+                  <Divider variant="fullWidth"/>
+                  <ListItemLink to="/login" primary="Login" icon={<ExitToAppIcon/>}/>
+                </>}
           </div>
         </List>
       </SwipeableDrawer>
