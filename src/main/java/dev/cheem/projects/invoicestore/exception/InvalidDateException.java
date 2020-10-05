@@ -18,4 +18,10 @@ public class InvalidDateException extends Exception {
         "Start date '" + invalidStartDate + "' occurs after end date '" + invalidEndDate + "'."
     );
   }
+
+  public static InvalidDateException wrongFormat(String invalidDate, String correctFormat) {
+    return new InvalidDateException(
+        "Date '" + invalidDate + "' is not in the required format '" + correctFormat + "'."
+    );
+  }
 }

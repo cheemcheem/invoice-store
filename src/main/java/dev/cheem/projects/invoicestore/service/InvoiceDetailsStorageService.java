@@ -98,6 +98,12 @@ public class InvoiceDetailsStorageService {
     return getList(invoiceUserId, false);
   }
 
+  public List<InvoiceDetails> getAllInvoiceDetailsGQL(Long invoiceUserId) {
+    return invoiceDetailsRepository.findAll().stream()
+        .filter(i -> Objects.equals(i.getInvoiceUser().getUserId(), invoiceUserId))
+        .collect(Collectors.toList());
+  }
+
   public List<BasicInvoiceDetailsDTO> getArchivedInvoiceDetails(Long invoiceUserId) {
     log.info("InvoiceDetailsStorageService.getArchivedInvoiceDetails");
     log.debug("invoiceUserId = " + invoiceUserId);

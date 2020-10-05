@@ -12,6 +12,9 @@ import IconButton from "@material-ui/core/IconButton";
 import InfoIcon from '@material-ui/icons/Info';
 import React, {useCallback, useState} from "react";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
+import Avatar from "@material-ui/core/Avatar";
+import useGQLQuery from "../../../hooks/useGQLQuery";
+import Typography from "@material-ui/core/Typography";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -25,7 +28,13 @@ const useStyles = makeStyles((theme: Theme) =>
         flexDirection: "column",
         justifyContent: "space-between",
         height: "100%"
-      }
+      },
+      // name: {
+      //   display: "flex",
+      //   flexDirection: "row",
+      //   justifyContent: "space-around",
+      //   alignItems: "center"
+      // },
     })
 )
 
@@ -33,7 +42,7 @@ export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
   const classes = useStyles();
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = useCallback(() => setMenuOpen(!menuOpen), [menuOpen, setMenuOpen]);
-
+  const {user} = useGQLQuery('{"query":"{user{name picture}}"}') as {user?: {name: string, picture: string}};
   return <>
     <IconButton edge="start"
                 className={classes.menuButton}
@@ -47,6 +56,15 @@ export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
                        ModalProps={{keepMounted: true}}>
         <List className={classes.list}>
           <div>
+            {/*<div className={classes.name}>*/}
+            {/*  <Avatar alt={user?.name} src={user?.picture}>*/}
+            {/*    {user?.name.split(" ").map(s => s[0]).reduce((s1, s2) => s1 + s2)}*/}
+            {/*  </Avatar>*/}
+            {/*  <Typography>{user?.name ?? ""}</Typography>*/}
+            {/*</div>*/}
+            <ListItemLink primary={user?.name ?? ""} icon={<Avatar alt={user?.name} src={user?.picture}>
+              {user?.name.split(" ").map(s => s[0]).reduce((s1, s2) => s1 + s2)}
+            </Avatar>}/>
             <ListSubheader color="primary">Pages</ListSubheader>
             <Divider variant="fullWidth"/>
             {loggedIn && <>
