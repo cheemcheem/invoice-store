@@ -5,7 +5,6 @@ import {useSnackbar} from "notistack";
 import useRedirect from "../../hooks/useRedirect";
 import {useState} from "react";
 import {useCallback} from "react";
-import {useMemo} from "react";
 import React from "react";
 import * as Cookie from "js-cookie";
 import download from "downloadjs";
@@ -18,7 +17,6 @@ import Typography from "@material-ui/core/Typography";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
 import CardContent from "@material-ui/core/CardContent";
 import Skeleton from "@material-ui/lab/Skeleton";
-import FormatDate from "../../utils/DateTimeFormat";
 import CardActions from "@material-ui/core/CardActions";
 import Button from "@material-ui/core/Button";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
@@ -26,6 +24,8 @@ import RestoreIcon from "@material-ui/icons/Restore";
 import ArchiveIcon from "@material-ui/icons/Archive";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {Invoice} from "../../utils/Types";
+import {useMutation} from '@apollo/client';
+import {ARCHIVE_INVOICE} from "../../utils/Queries";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   grid: {
@@ -65,38 +65,39 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 type ViewProps = {
   invoice: Invoice | undefined,
-  triggerRefresh: any
+  loading: boolean
 }
-export default function View({invoice, triggerRefresh}: ViewProps) {
+
+export default function View({invoice, loading}: ViewProps) {
   const classes = useStyles();
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const {component, triggerRedirect} = useRedirect();
   const [canRender, setCanRender] = useState(true);
-
+  const [setArchived] = useMutation(ARCHIVE_INVOICE);
   const archiveButton = useCallback(() => {
-    fetch(`/api/invoice/${invoice?.invoiceArchived ? "restore" : "archive"}/${invoice?.invoiceDetailsId}`, {
-      method: "PUT",
-      headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
-    })
-    .then(() => {
-      if (invoice?.invoiceArchived) {
-        enqueueSnackbar("Restored invoice.", {variant: "success"})
-      } else {
-        enqueueSnackbar("Archived invoice.", {variant: "warning"})
+    if (loading) {
+      return;
+    }
+    const archived = invoice?.archived;
+    setArchived({
+      variables: {
+        updated: {
+          id: invoice?.id,
+          archived: !archived
+        }
       }
     })
-    .then(() => triggerRefresh({}))
     .catch(() => {
-      if (invoice?.invoiceArchived) {
+      if (archived) {
         enqueueSnackbar("Failed to restore invoice.", {variant: "error"})
       } else {
         enqueueSnackbar("Failed to archive invoice.", {variant: "error"})
       }
     })
-  }, [invoice, triggerRefresh, enqueueSnackbar]);
+  }, [invoice, enqueueSnackbar, setArchived, loading]);
 
   const deleteButton = useCallback(() => {
-    fetch(`/api/invoice/delete/${invoice?.invoiceDetailsId}`, {
+    fetch(`/api/invoice/delete/${invoice?.id}`, {
       method: "DELETE",
       headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
     })
@@ -118,10 +119,10 @@ export default function View({invoice, triggerRefresh}: ViewProps) {
       return enqueueSnackbar("Can't download, no file.", {variant: "warning"})
     }
     const key = enqueueSnackbar("Starting download...", {variant: "info", persist: true})
-    fetch(`/api/invoice/file/${invoice?.invoiceDetailsId}`)
+    fetch(`/api/invoice/file/${invoice?.id}`)
     .then(response => response.blob())
     .then(blob => {
-      download(blob, invoice?.invoiceFile?.invoiceFileName, invoice?.invoiceFile?.invoiceFileType)
+      download(blob, invoice?.invoiceFile?.name, invoice?.invoiceFile?.type)
     })
     .then(() => {
       closeSnackbar(key);
@@ -133,10 +134,7 @@ export default function View({invoice, triggerRefresh}: ViewProps) {
     })
   }, [invoice, enqueueSnackbar, closeSnackbar]);
 
-  const hasFile = useMemo(() => {
-    return invoice?.invoiceFile !== undefined
-        && invoice?.invoiceFile !== null
-  }, [invoice]);
+  const hasFile = !loading && invoice!.invoiceFile !== undefined && invoice!.invoiceFile !== null;
 
   return <>
     <Grid className={classes.grid}
@@ -149,42 +147,41 @@ export default function View({invoice, triggerRefresh}: ViewProps) {
           {hasFile && (canRender
               ? <>
                 <CardMedia className={classes.media}
-                           image={`/api/invoice/file/${invoice!.invoiceDetailsId!}`}
-                           title={invoice!.invoiceFile!.invoiceFileName}
+                           image={`/api/invoice/file/${invoice!.id!}`}
+                           title={invoice!.invoiceFile!.name}
                            component="img"
-                           alt={invoice!.invoiceFile!.invoiceFileName}
+                           alt={invoice!.invoiceFile!.name}
                            onError={() => setCanRender(false)}/>
               </>
               : <>
                 <CardHeader
                     title={<Typography color={"textSecondary"} className={classes.fileHeader}>
-                      {invoice!.invoiceFile!.invoiceFileName}
+                      {invoice!.invoiceFile!.name}
                       <AttachFileIcon/>
                     </Typography>}/>
               </>)
           }
         </CardActionArea>
         <CardContent>
-          <CardHeader title={"NAME"} subheader={invoice ? invoice.invoiceName : <Skeleton/>}/>
+          <CardHeader title={"NAME"} subheader={loading ? <Skeleton/> : invoice!.name}/>
           <CardHeader title={"DATE"}
-                      subheader={invoice ? FormatDate(invoice.invoiceDate) :
-                          <Skeleton/>}/>
+                      subheader={loading ? <Skeleton/> : invoice!.date}/>
           <CardHeader title={"VAT TOTAL"}
-                      subheader={invoice ? `£${invoice.invoiceTotalVAT}` : <Skeleton/>}/>
+                      subheader={loading ? <Skeleton/> : `£${invoice!.vatTotal}`}/>
           <CardHeader title={"TOTAL"}
-                      subheader={invoice ? `£${invoice.invoiceTotal}` : <Skeleton/>}/>
+                      subheader={loading ? <Skeleton/> : `£${invoice!.total}`}/>
           <CardActions className={classes.buttons}>
-            <Button disabled={!invoice || !hasFile} color="primary" onClick={downloadButton}
+            <Button disabled={loading || !hasFile} color="primary" onClick={downloadButton}
                     startIcon={<CloudDownloadIcon/>}>
               Download
             </Button>
-            <Button disabled={!invoice}
+            <Button disabled={loading}
                     color={hasFile ? "default" : "primary"}
                     onClick={archiveButton}
-                    startIcon={invoice?.invoiceArchived ? <RestoreIcon/> : <ArchiveIcon/>}>
-              {!(invoice?.invoiceArchived) ? "Archive" : "Restore"}
+                    startIcon={invoice?.archived ? <RestoreIcon/> : <ArchiveIcon/>}>
+              {loading ? "Archive" : !(invoice!.archived) ? "Archive" : "Restore"}
             </Button>
-            <Button disabled={!invoice || !invoice?.invoiceArchived}
+            <Button disabled={loading || !invoice!.archived}
                     color="secondary"
                     onClick={deleteButton}
                     startIcon={<DeleteIcon/>}>

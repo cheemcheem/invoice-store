@@ -44,8 +44,10 @@ public class GraphQLDataFetchers {
         .getSelectionSet()
         .getFields()
         .stream()
-        .filter(selectedField -> !selectedField.getQualifiedName()
-            .contains("/")) // only fields for current level
+        // only fields for current level
+        .filter(selectedField -> !selectedField.getQualifiedName().contains("/"))
+        // remove things like __typename introspection fields
+        .filter(selectedField -> !selectedField.getName().startsWith("__"))
         .map(SelectedField::getName)
         .collect(Collectors.toSet());
   }

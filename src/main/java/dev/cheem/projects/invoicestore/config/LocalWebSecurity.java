@@ -35,10 +35,13 @@ public class LocalWebSecurity extends WebSecurityConfigurerAdapter {
         .logout(l -> l
             .logoutUrl("/logout")
             .logoutSuccessHandler(
-                (request, response, authentication) -> handleSuccess(request, response))
+                (request, response, authentication) -> handleSuccess(request, response)
+            )
         )
         .oauth2Login(o -> o
-            .successHandler((rq, response, auth) -> response.sendRedirect("/"))
+            .successHandler(
+                (request, response, authentication) -> handleSuccess(request, response)
+            )
         )
     ;
   }

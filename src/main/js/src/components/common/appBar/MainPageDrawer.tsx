@@ -13,8 +13,8 @@ import InfoIcon from '@material-ui/icons/Info';
 import React, {useCallback, useState} from "react";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import Avatar from "@material-ui/core/Avatar";
-import useGQLQuery from "../../../hooks/useGQLQuery";
-import Typography from "@material-ui/core/Typography";
+import {gql, useQuery} from '@apollo/client';
+import {Skeleton} from "@material-ui/lab";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -29,6 +29,13 @@ const useStyles = makeStyles((theme: Theme) =>
         justifyContent: "space-between",
         height: "100%"
       },
+      failedAvatar: {
+        height: "60px",
+        backgroundColor: theme.palette.warning.dark
+      },
+      loadingAvatarText: {
+        height: "2em"
+      },
       // name: {
       //   display: "flex",
       //   flexDirection: "row",
@@ -38,11 +45,20 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 )
 
+const USER = gql`
+    query {
+        user {
+            name
+            picture
+        }
+    }
+`;
+
 export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
   const classes = useStyles();
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = useCallback(() => setMenuOpen(!menuOpen), [menuOpen, setMenuOpen]);
-  const {user} = useGQLQuery('{"query":"{user{name picture}}"}') as {user?: {name: string, picture: string}};
+  const {loading, error, data} = useQuery(USER);
   return <>
     <IconButton edge="start"
                 className={classes.menuButton}
@@ -56,15 +72,21 @@ export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
                        ModalProps={{keepMounted: true}}>
         <List className={classes.list}>
           <div>
-            {/*<div className={classes.name}>*/}
-            {/*  <Avatar alt={user?.name} src={user?.picture}>*/}
-            {/*    {user?.name.split(" ").map(s => s[0]).reduce((s1, s2) => s1 + s2)}*/}
-            {/*  </Avatar>*/}
-            {/*  <Typography>{user?.name ?? ""}</Typography>*/}
-            {/*</div>*/}
-            <ListItemLink primary={user?.name ?? ""} icon={<Avatar alt={user?.name} src={user?.picture}>
-              {user?.name.split(" ").map(s => s[0]).reduce((s1, s2) => s1 + s2)}
-            </Avatar>}/>
+            {
+              error
+                  ? <Skeleton className={classes.failedAvatar}/>
+                  : loading
+                  ? <ListItemLink
+                      primary={<Skeleton className={classes.loadingAvatarText} variant="text"/>}
+                      icon={<Avatar><Skeleton variant={"circle"}/></Avatar>}/>
+                  : <ListItemLink primary={data?.user?.name ?? ""}
+                                  icon={<Avatar alt={data?.user?.name} src={data?.user?.picture}>{
+                                    data?.user?.name
+                                    .split(" ")
+                                    .map((s: string) => s[0])
+                                    .reduce((s1: string, s2: string) => s1 + s2)
+                                  }</Avatar>}/>
+            }
             <ListSubheader color="primary">Pages</ListSubheader>
             <Divider variant="fullWidth"/>
             {loggedIn && <>

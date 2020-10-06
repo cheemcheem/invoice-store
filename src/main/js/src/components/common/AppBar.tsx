@@ -18,7 +18,7 @@ const useStyles = makeStyles(() =>
     })
 )
 export type MainPageAppBarProps = {
-  title: string,
+  title: ReactNode,
   buttons?: ReactNode
 }
 

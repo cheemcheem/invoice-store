@@ -9,7 +9,7 @@ import useRedirect from "../../../hooks/useRedirect";
 
 interface AppDrawerItem {
   icon?: React.ReactElement;
-  primary: string;
+  primary: string | React.ReactNode;
   to?: string;
 }
 

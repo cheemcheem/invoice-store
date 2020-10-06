@@ -1,14 +1,14 @@
 export type Invoice = {
-  invoiceDetailsId: string,
-  invoiceDate: Date,
-  invoiceName: string,
-  invoiceTotalVAT: number,
-  invoiceTotal: number,
+  id: string,
+  date: Date,
+  name: string,
+  vatTotal: number,
+  total: number,
   invoiceFile?: {
-    invoiceFileName: string,
-    invoiceFileType: string
+    name: string,
+    type: string
   },
-  invoiceArchived: boolean
+  archived: boolean
 }
 export type BasicInvoice = {
   invoiceId: string,
