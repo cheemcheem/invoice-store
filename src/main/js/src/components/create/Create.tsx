@@ -78,7 +78,7 @@ export type CreateState = {
   invoiceName: string,
   invoiceTotalVAT: string,
   invoiceTotal: string,
-  invoiceFile: any
+  invoiceFile?: File
 };
 export type CreateProps = {
   submit: (values: CreateState) => void
@@ -90,7 +90,7 @@ export default function Create({submit}: CreateProps) {
     invoiceName: '',
     invoiceTotalVAT: '',
     invoiceTotal: '',
-    invoiceFile: ''
+    invoiceFile: undefined
   } as CreateState);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

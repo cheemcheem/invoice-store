@@ -9,15 +9,63 @@ import {useSnackbar} from "notistack";
 import {useMutation} from "@apollo/client";
 import {Invoice} from "../utils/Types";
 import {CREATE_INVOICE} from "../utils/Queries";
+import Cookies from "js-cookie";
+import useLoggedIn from "../hooks/useLoggedIn";
+import {BasicInvoice} from "../utils/Types";
+import {gql} from "@apollo/client";
 
 export default function CreatePage() {
   const {component, triggerRedirect} = useRedirect();
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
-  const [createInvoice] = useMutation<{ createInvoice: Invoice }>(CREATE_INVOICE);
+  const {userId} = useLoggedIn();
+
+  const [createInvoice] = useMutation<{ createInvoice: Invoice }>(CREATE_INVOICE, {
+    update(cache, {data}) {
+      if (!data) {
+        return;
+      }
+      const invoice = data!.createInvoice;
+      cache.modify({
+        id: `User:${userId}`,
+        fields: {
+          invoices(existingInvoices: BasicInvoice[] = [], {}) {
+            const newInvoice = cache.writeFragment({
+              data: invoice,
+              fragment: gql`
+                    fragment NewInvoice on Invoice {
+                        id
+                        date
+                        name
+                        total
+                        vatTotal
+                        archived
+                    }
+              `
+            })
+            return [...existingInvoices, newInvoice]
+          }
+        }
+      })
+
+    }
+  });
 
   const submit = useMemo(() => (values: CreateState) => {
-
     const key = enqueueSnackbar("Uploading invoice.", {variant: "info", persist: true});
+
+    const upload = (id: string) => {
+      if (!values.invoiceFile) {
+        return id;
+      }
+      const formData = new FormData();
+      formData.append("invoiceFile", values.invoiceFile!);
+      return fetch(`/api/invoice/file/${id}`, {
+        method: "PUT",
+        headers: {"X-XSRF-TOKEN": Cookies.get("XSRF-TOKEN")!},
+        body: formData
+      }).then(() => id);
+    };
+
     createInvoice({
       variables: {
         input: {
@@ -32,11 +80,14 @@ export default function CreatePage() {
       closeSnackbar(key);
 
       if (result.errors) {
-        enqueueSnackbar("Failed to create invoice.", {variant: "error"});
-      } else {
-        enqueueSnackbar("Created invoice!", {variant: "success"});
-        triggerRedirect(`/view/${result?.data!.createInvoice.id}`);
+        throw result.errors;
       }
+      return result.data!.createInvoice.id;
+    })
+    .then(upload)
+    .then((id: string) => {
+      enqueueSnackbar("Created invoice!", {variant: "success"});
+      triggerRedirect(`/view/${id}`);
     })
     .catch((e) => {
       console.log({e})

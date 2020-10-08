@@ -5,9 +5,7 @@ import dev.cheem.projects.invoicestore.service.InvoiceDetailsStorageService;
 import dev.cheem.projects.invoicestore.service.InvoiceFileStorageService;
 import dev.cheem.projects.invoicestore.service.UserService;
 import dev.cheem.projects.invoicestore.util.Constants;
-import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Date;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +13,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,12 +40,9 @@ public class InvoiceController {
   private final InvoiceDetailsStorageService invoiceDetailsStorageService;
 
   @Transactional
-  @PostMapping("/new")
-  public ResponseEntity<String> uploadInvoice(
-      @RequestParam("invoiceDate") @DateTimeFormat(iso = ISO.DATE) Date invoiceDate,
-      @RequestParam("invoiceName") String invoiceName,
-      @RequestParam("invoiceTotalVAT") BigDecimal invoiceTotalVAT,
-      @RequestParam("invoiceTotal") BigDecimal invoiceTotal,
+  @PutMapping("/file/{invoiceDetailsId}")
+  public ResponseEntity<String> uploadInvoiceFile(
+      @PathVariable String invoiceDetailsId,
       @RequestParam(name = "invoiceFile", required = false) MultipartFile invoiceFile,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
@@ -58,17 +52,17 @@ public class InvoiceController {
       return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).build();
     }
     try {
-      var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
-      var storedInvoice = invoiceDetailsStorageService.storeInvoice(
-          invoiceDate,
-          invoiceName,
-          invoiceTotalVAT,
-          invoiceTotal,
-          storedInvoiceFileId,
-          invoiceUserId
-      );
+      var invoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
+      var attachedFileToInvoice = invoiceDetailsStorageService
+          .setInvoiceFileId(invoiceDetailsId, invoiceFileId);
+
+      if (!attachedFileToInvoice) {
+        invoiceFileStorageService.deleteById(invoiceFileId);
+        return ResponseEntity.notFound().build();
+      }
+
       var invoiceLocationURI = ServletUriComponentsBuilder.fromPath("/view/")
-          .path(storedInvoice.getInvoiceDetailsId())
+          .path(invoiceDetailsId)
           .build().toUri();
 
       return ResponseEntity.status(HttpStatus.SEE_OTHER).location(invoiceLocationURI).build();

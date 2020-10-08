@@ -61,15 +61,6 @@ public class InvoiceFileStorageService {
 
   }
 
-  public InvoiceFileDetailsDTO getDefiniteFileDetails(String invoiceFileId) {
-    return getFileDetails(invoiceFileId).orElseThrow(StorageException::new);
-  }
-
-
-  public Optional<InvoiceFileDetailsDTO> getFileDetails(String invoiceFileId) {
-    return awsService.getFileDetails(invoiceFileId);
-  }
-
   public void deleteById(String invoiceFileId) {
     awsService.deleteFile(invoiceFileId);
   }

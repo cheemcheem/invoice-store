@@ -23,9 +23,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class InvoiceDetailsStorageService {
 
-  @PersistenceContext
-  private final EntityManager entityManager;
-
   private final UserService userService;
   private final InvoiceFileStorageService invoiceFileStorageService;
   private final InvoiceDetailsRepository invoiceDetailsRepository;
@@ -48,45 +45,6 @@ public class InvoiceDetailsStorageService {
     invoice.setInvoiceUser(userService.getUser(invoiceUserId));
 
     return invoiceDetailsRepository.save(invoice);
-  }
-
-  @Transactional
-  public Optional<InvoiceDetailsDTO> getInvoiceDetails(String invoiceDetailsId,
-      Long invoiceUserId) {
-    log.info("InvoiceDetailsStorageService.getInvoiceDetails");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId + ", invoiceUserId = " + invoiceUserId);
-    var optionalDetails = invoiceDetailsRepository.findById(invoiceDetailsId);
-
-    if (optionalDetails.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var invoiceDetails = optionalDetails.get();
-
-    if (!Objects.equals(invoiceDetails.getInvoiceUser().getUserId(), invoiceUserId)) {
-      return Optional.empty();
-    }
-    var invoiceDetailsDTO = new InvoiceDetailsDTO();
-
-    invoiceDetailsDTO.setInvoiceDetailsId(invoiceDetails.getInvoiceDetailsId());
-    invoiceDetailsDTO
-        .setInvoiceDate(LocalDateTimeConverter.formatISO(invoiceDetails.getInvoiceDate()));
-    invoiceDetailsDTO.setInvoiceName(invoiceDetails.getInvoiceName());
-    invoiceDetailsDTO.setInvoiceTotalVAT(invoiceDetails.getInvoiceTotalVAT());
-    invoiceDetailsDTO.setInvoiceTotal(invoiceDetails.getInvoiceTotal());
-    invoiceDetailsDTO.setInvoiceArchived(invoiceDetails.getInvoiceArchived());
-
-    if (Objects.isNull(invoiceDetails.getInvoiceFile())) {
-      return Optional.of(invoiceDetailsDTO);
-    }
-
-    var invoiceFileDTO = invoiceFileStorageService
-        .getDefiniteFileDetails(invoiceDetails.getInvoiceFile());
-
-    invoiceDetailsDTO.setInvoiceFile(invoiceFileDTO);
-
-    return Optional.of(invoiceDetailsDTO);
-
   }
 
   public Optional<String> getInvoiceCSV(Long invoiceUserId) {
@@ -121,5 +79,19 @@ public class InvoiceDetailsStorageService {
       return Optional.empty();
     }
     return Optional.ofNullable(invoiceDetails.get().getInvoiceFile());
+  }
+
+  public boolean setInvoiceFileId(String invoiceDetailsId, String invoiceFileId) {
+    var optionalInvoiceDetails = invoiceDetailsRepository.findById(invoiceDetailsId);
+    if (optionalInvoiceDetails.isEmpty()) {
+      return false;
+    }
+    var invoiceDetails = optionalInvoiceDetails.get();
+    if (invoiceDetails.getInvoiceFile() != null) {
+     invoiceFileStorageService.deleteById(invoiceDetails.getInvoiceFile());
+    }
+    invoiceDetails.setInvoiceFile(invoiceFileId);
+    invoiceDetailsRepository.save(invoiceDetails);
+    return true;
   }
 }
