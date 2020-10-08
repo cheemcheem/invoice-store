@@ -3,7 +3,7 @@ import {GET_USER} from "../utils/Queries";
 import {User} from "../utils/Types";
 
 export default function useLoggedIn() {
-  const {loading, error, refetch} = useQuery<{ user: User}>(GET_USER, {
+  const {loading, error, refetch} = useQuery<{ user: User }>(GET_USER, {
     fetchPolicy: "cache-first",
     pollInterval: 10000
   });

@@ -33,13 +33,13 @@ export default function ListItemLink(props: AppDrawerItem) {
       () =>
           to
               ? React.forwardRef<any, Omit<NavLinkProps, 'to'>>((itemProps, ref) => (
-              <>
-                <NavLink activeClassName={classes.active}
-                         onClick={() => triggerRedirect(to)}
-                         to={to} ref={ref} {...itemProps} />
-                {component}
-              </>
-          )) : undefined,
+                  <>
+                    <NavLink activeClassName={classes.active}
+                             onClick={() => triggerRedirect(to)}
+                             to={to} ref={ref} {...itemProps} />
+                    {component}
+                  </>
+              )) : undefined,
       [to, component, triggerRedirect, classes.active],
   );
 

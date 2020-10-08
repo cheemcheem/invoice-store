@@ -109,6 +109,7 @@ public class GraphQLDataFetchers {
       ).orElse(null);
     };
   }
+
   public DataFetcher<Boolean> deleteInvoiceDataFetcher() {
     return dataFetchingEnvironment -> {
       log.debug("GraphQLDataFetchers.updateInvoiceDataFetcher");

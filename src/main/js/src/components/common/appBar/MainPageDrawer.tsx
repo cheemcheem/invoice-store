@@ -67,7 +67,8 @@ export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
             {
               error
                   ? <ListItemLink
-                      primary={<Skeleton className={classes.loadingAvatarText} variant="text" animation={false}/>}
+                      primary={<Skeleton className={classes.loadingAvatarText} variant="text"
+                                         animation={false}/>}
                       icon={<Avatar><Skeleton variant={"circle"} animation={false}/></Avatar>}/>
                   : loading
                   ? <ListItemLink

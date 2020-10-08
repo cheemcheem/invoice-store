@@ -1,6 +1,5 @@
 package dev.cheem.projects.invoicestore.service;
 
-import dev.cheem.projects.invoicestore.dto.BasicInvoiceDetailsDTO;
 import dev.cheem.projects.invoicestore.dto.InvoiceDetailsDTO;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
 import dev.cheem.projects.invoicestore.repository.InvoiceDetailsRepository;
@@ -8,11 +7,9 @@ import dev.cheem.projects.invoicestore.util.LocalDateTimeConverter;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
