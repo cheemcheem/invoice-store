@@ -28,7 +28,7 @@ export default function CreatePage() {
       cache.modify({
         id: `User:${userId}`,
         fields: {
-          invoices(existingInvoices: BasicInvoice[] = [], {}) {
+          invoices(existingInvoices: BasicInvoice[] = []) {
             const newInvoice = cache.writeFragment({
               data: invoice,
               fragment: gql`
