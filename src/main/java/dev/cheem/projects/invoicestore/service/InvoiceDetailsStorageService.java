@@ -1,17 +1,13 @@
 package dev.cheem.projects.invoicestore.service;
 
-import dev.cheem.projects.invoicestore.dto.InvoiceDetailsDTO;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
 import dev.cheem.projects.invoicestore.repository.InvoiceDetailsRepository;
-import dev.cheem.projects.invoicestore.util.LocalDateTimeConverter;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +84,7 @@ public class InvoiceDetailsStorageService {
     }
     var invoiceDetails = optionalInvoiceDetails.get();
     if (invoiceDetails.getInvoiceFile() != null) {
-     invoiceFileStorageService.deleteById(invoiceDetails.getInvoiceFile());
+      invoiceFileStorageService.deleteById(invoiceDetails.getInvoiceFile());
     }
     invoiceDetails.setInvoiceFile(invoiceFileId);
     invoiceDetailsRepository.save(invoiceDetails);

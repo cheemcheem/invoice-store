@@ -7,12 +7,12 @@ import AppBarBackButton from "./common/AppBarBackButton";
 import useRedirect from "../hooks/useRedirect";
 import {useSnackbar} from "notistack";
 import {useMutation} from "@apollo/client";
+import {gql} from "@apollo/client";
 import {Invoice} from "../utils/Types";
+import {BasicInvoice} from "../utils/Types";
 import {CREATE_INVOICE} from "../utils/Queries";
 import Cookies from "js-cookie";
 import useLoggedIn from "../hooks/useLoggedIn";
-import {BasicInvoice} from "../utils/Types";
-import {gql} from "@apollo/client";
 
 export default function CreatePage() {
   const {component, triggerRedirect} = useRedirect();
@@ -32,14 +32,14 @@ export default function CreatePage() {
             const newInvoice = cache.writeFragment({
               data: invoice,
               fragment: gql`
-                    fragment NewInvoice on Invoice {
-                        id
-                        date
-                        name
-                        total
-                        vatTotal
-                        archived
-                    }
+                  fragment NewInvoice on Invoice {
+                      id
+                      date
+                      name
+                      total
+                      vatTotal
+                      archived
+                  }
               `
             })
             return [...existingInvoices, newInvoice]

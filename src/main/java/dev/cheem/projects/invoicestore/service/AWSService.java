@@ -1,7 +1,6 @@
 package dev.cheem.projects.invoicestore.service;
 
 import dev.cheem.projects.invoicestore.config.AWSConfig.AWSInstance;
-import dev.cheem.projects.invoicestore.dto.InvoiceFileDetailsDTO;
 import dev.cheem.projects.invoicestore.exception.StorageException;
 import dev.cheem.projects.invoicestore.model.InvoiceFile;
 import dev.cheem.projects.invoicestore.model.InvoiceFileDetails;
