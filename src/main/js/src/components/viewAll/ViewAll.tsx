@@ -1,15 +1,13 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {FixedSizeList} from 'react-window';
 import {createStyles, makeStyles, Theme, useTheme} from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-import {useSnackbar} from "notistack";
 import Skeleton from "@material-ui/lab/Skeleton";
 import List from "@material-ui/core/List";
 import {BasicInvoice} from "../../utils/Types";
-import FormatDate from "../../utils/DateTimeFormat";
 import RenderRow, {useStyles as useRenderRowStyles} from "../viewAll/RenderRow";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -44,36 +42,20 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-export type ViewAllProps = { archived?: boolean };
+export type ViewAllProps = {
+  archived?: boolean,
+  allInvoices: BasicInvoice[],
+  loading: boolean,
+};
 
-export default function ViewAll({archived}: ViewAllProps) {
+export default function ViewAll({archived, allInvoices, loading}: ViewAllProps) {
   const classes = useStyles();
   const rowClasses = useRenderRowStyles();
   const theme = useTheme();
-  const {enqueueSnackbar} = useSnackbar();
-
-  const [allInvoices, setAllInvoices] = useState(undefined as undefined | BasicInvoice[]);
-
-  useEffect(() => {
-    setAllInvoices(undefined);
-    fetch(`/api/invoice/${archived ? "archived" : "all"}`)
-    .then(response => response.text())
-    .then(JSON.parse)
-    .then((invoices: BasicInvoice[]) => invoices.map(invoice => ({
-      ...invoice,
-      invoiceDate: FormatDate(new Date(invoice.invoiceDate))
-    })))
-    .then(setAllInvoices)
-    .catch(() => {
-      enqueueSnackbar("Failed to retrieve invoices...", {variant: "error"});
-      setAllInvoices([])
-    });
-  }, [archived, setAllInvoices, enqueueSnackbar]);
-
 
   return <div className={classes.root}>
     <Card>
-      {allInvoices
+      {!loading
           ? allInvoices.length === 0
               ? <CardHeader title={"Empty!"}
                             subheader={`Looks like there are no${archived ? " archived" : ""} invoices`}/>

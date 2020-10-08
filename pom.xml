@@ -61,6 +61,16 @@
       <groupId>software.amazon.awssdk</groupId>
       <artifactId>s3</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.graphql-java</groupId>
+      <artifactId>graphql-java</artifactId>
+      <version>${graphql-java.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.graphql-java</groupId>
+      <artifactId>graphql-java-spring-boot-starter-webmvc</artifactId>
+      <version>${graphql-java-spring.version}</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
@@ -76,6 +86,8 @@
   </dependencyManagement>
 
   <properties>
+    <graphql-java.version>15.0</graphql-java.version>
+    <graphql-java-spring.version>2.0</graphql-java-spring.version>
     <github.username>cheemcheem</github.username>
     <aws.java.sdk.version>2.14.21</aws.java.sdk.version>
   </properties>

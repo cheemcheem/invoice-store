@@ -36,14 +36,11 @@ public class AWSConfig {
 
 
   private S3Client S3Client() {
-    log.info("Creating S3 Client");
-    var s3Client = S3Client.builder()
+    return S3Client.builder()
         .region(Region.of(region))
         .endpointOverride(URI.create(endpoint))
         .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
         .build();
-    log.debug("S3Client '{}' ", s3Client);
-    return s3Client;
   }
 
   private GetObjectRequest.Builder getS3ObjectRequestBuilder() {
@@ -73,7 +70,8 @@ public class AWSConfig {
 
   @Bean
   public AWSInstance awsInstance() {
-    return new AWSInstance(
+    log.debug("Creating AWSInstance.");
+    var awsInstance = new AWSInstance(
         S3Client(),
         getS3ObjectRequestBuilder(),
         deleteS3ObjectRequestBuilder(),
@@ -82,6 +80,8 @@ public class AWSConfig {
         s3FileNameMetaTag(),
         maxFileLimit()
     );
+    log.debug("Created AWSInstance '{}'.", awsInstance);
+    return awsInstance;
   }
 
   @Data

@@ -1,32 +1,24 @@
-import {useState} from "react";
-import {useCallback} from "react";
-import {useEffect} from "react";
+import {useQuery} from "@apollo/client";
+import {GET_USER} from "../utils/Queries";
+import {User} from "../utils/Types";
 
 export default function useLoggedIn() {
-  const [loggedIn, setIsLoggedIn] = useState("not checked" as "not checked" | boolean);
+  const {data, loading, error, refetch} = useQuery<{ user: User }>(GET_USER, {
+    fetchPolicy: "cache-first",
+    pollInterval: 10000
+  });
 
-  const checkLoggedIn = useCallback(() => {
-    fetch("/api/user", {keepalive: true})
-    .then(response => {
-      if (response.redirected) {
-        return setIsLoggedIn(false);
-      }
-      if (response.headers.has('Content-Length')
-          && Number(response.headers.get('Content-Length')) === 0) {
-        return setIsLoggedIn(false);
-      }
+  let loggedIn: "not checked" | boolean;
+  let userId = undefined;
+  if (error) {
+    loggedIn = false;
+  } else if (loading) {
+    loggedIn = "not checked";
+  } else {
+    loggedIn = true;
+    userId = data!.user.id;
+  }
 
-      if (!String(response.status).startsWith("2")) {
-        return setIsLoggedIn(false);
-      }
+  return {loggedIn, refetch, userId};
 
-      return setIsLoggedIn(true);
-
-    })
-    .catch(() => setIsLoggedIn(false))
-  }, [setIsLoggedIn]);
-
-  useEffect(checkLoggedIn, [checkLoggedIn]);
-
-  return loggedIn;
 }

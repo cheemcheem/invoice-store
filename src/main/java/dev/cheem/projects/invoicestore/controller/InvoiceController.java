@@ -1,16 +1,11 @@
 package dev.cheem.projects.invoicestore.controller;
 
-import dev.cheem.projects.invoicestore.dto.BasicInvoiceDetailsDTO;
-import dev.cheem.projects.invoicestore.dto.InvoiceDetailsDTO;
 import dev.cheem.projects.invoicestore.exception.StorageException;
 import dev.cheem.projects.invoicestore.service.InvoiceDetailsStorageService;
 import dev.cheem.projects.invoicestore.service.InvoiceFileStorageService;
 import dev.cheem.projects.invoicestore.service.UserService;
 import dev.cheem.projects.invoicestore.util.Constants;
-import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,17 +13,13 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,12 +39,9 @@ public class InvoiceController {
   private final InvoiceDetailsStorageService invoiceDetailsStorageService;
 
   @Transactional
-  @PostMapping("/new")
-  public ResponseEntity<String> uploadInvoice(
-      @RequestParam("invoiceDate") @DateTimeFormat(iso = ISO.DATE) Date invoiceDate,
-      @RequestParam("invoiceName") String invoiceName,
-      @RequestParam("invoiceTotalVAT") BigDecimal invoiceTotalVAT,
-      @RequestParam("invoiceTotal") BigDecimal invoiceTotal,
+  @PutMapping("/file/{invoiceDetailsId}")
+  public ResponseEntity<String> uploadInvoiceFile(
+      @PathVariable String invoiceDetailsId,
       @RequestParam(name = "invoiceFile", required = false) MultipartFile invoiceFile,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
   ) {
@@ -63,17 +51,17 @@ public class InvoiceController {
       return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).build();
     }
     try {
-      var storedInvoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
-      var storedInvoice = invoiceDetailsStorageService.storeInvoice(
-          invoiceDate,
-          invoiceName,
-          invoiceTotalVAT,
-          invoiceTotal,
-          storedInvoiceFileId,
-          invoiceUserId
-      );
+      var invoiceFileId = invoiceFileStorageService.storeFile(invoiceFile);
+      var attachedFileToInvoice = invoiceDetailsStorageService
+          .setInvoiceFileId(invoiceDetailsId, invoiceFileId);
+
+      if (!attachedFileToInvoice) {
+        invoiceFileStorageService.deleteById(invoiceFileId);
+        return ResponseEntity.notFound().build();
+      }
+
       var invoiceLocationURI = ServletUriComponentsBuilder.fromPath("/view/")
-          .path(storedInvoice.getInvoiceDetailsId())
+          .path(invoiceDetailsId)
           .build().toUri();
 
       return ResponseEntity.status(HttpStatus.SEE_OTHER).location(invoiceLocationURI).build();
@@ -88,19 +76,6 @@ public class InvoiceController {
 
     log.error("Failed to build a previous response.");
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-  }
-
-  @GetMapping("/details/{invoiceDetailsId}")
-  public ResponseEntity<InvoiceDetailsDTO> getInvoice(
-      @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceUploadController.getInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
-    var optional = invoiceDetailsStorageService.getInvoiceDetails(invoiceDetailsId, invoiceUserId);
-
-    return ResponseEntity.of(optional);
-
   }
 
   @Transactional
@@ -164,81 +139,5 @@ public class InvoiceController {
         .body(new ByteArrayResource(csvData.get().getBytes()));
   }
 
-  @GetMapping("/all")
-  public ResponseEntity<List<BasicInvoiceDetailsDTO>> getInvoiceList(
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceUploadController.getInvoiceList");
-    return ResponseEntity.ok(invoiceDetailsStorageService.getAllInvoiceDetails(invoiceUserId));
-  }
-
-  @GetMapping("/archived")
-  public ResponseEntity<List<BasicInvoiceDetailsDTO>> getArchivedInvoiceList(
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceUploadController.getArchivedInvoiceList");
-    return ResponseEntity.ok(invoiceDetailsStorageService.getArchivedInvoiceDetails(invoiceUserId));
-  }
-
-  @PutMapping("/archive/{invoiceDetailsId}")
-  public ResponseEntity<String> archiveInvoice(
-      @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceController.archiveInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
-
-    var optional = invoiceDetailsStorageService.archiveInvoice(invoiceDetailsId, invoiceUserId);
-
-    if (!optional) {
-      return ResponseEntity.notFound().build();
-    }
-
-    return ResponseEntity.noContent().build();
-
-  }
-
-  @PutMapping("/restore/{invoiceDetailsId}")
-  public ResponseEntity<String> restoreInvoice(
-      @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceController.restoreInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
-
-    var optional = invoiceDetailsStorageService.restoreInvoice(invoiceDetailsId, invoiceUserId);
-
-    if (!optional) {
-      return ResponseEntity.notFound().build();
-    }
-
-    return ResponseEntity.noContent().build();
-
-  }
-
-  @DeleteMapping("/delete/{invoiceDetailsId}")
-  public ResponseEntity<String> deleteInvoice(
-      @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceController.deleteInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
-
-    var optionalDeleted = invoiceDetailsStorageService
-        .deleteInvoiceDetails(invoiceDetailsId, invoiceUserId);
-
-    if (optionalDeleted.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-
-    var deletedDetails = optionalDeleted.get();
-
-    if (deletedDetails) {
-      return ResponseEntity.noContent().build();
-    }
-
-    return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
-
-  }
 
 }

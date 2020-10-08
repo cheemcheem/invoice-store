@@ -32,11 +32,11 @@ export default function RenderRow(props: ListChildComponentProps) {
       <ListItem button
                 style={style}
                 key={index}
-                onClick={() => triggerRedirect(`/view/${invoice.invoiceId}`)}
+                onClick={() => triggerRedirect(`/view/${invoice.id}`)}
                 className={classes.row + " " + (index % 2 === 1 ? classes.darkRow : undefined)}>
         <ListItemText key={index}
-                      primary={invoice.invoiceName}
-                      secondary={invoice.invoiceDate}
+                      primary={invoice.name}
+                      secondary={invoice.date}
         />
         {component}
       </ListItem>

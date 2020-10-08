@@ -3,9 +3,10 @@ import {Route, Switch} from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
 import * as MuiAppBar from "@material-ui/core/AppBar";
 import React, {ReactNode} from "react";
+import {useContext} from "react";
 import {createStyles, makeStyles} from "@material-ui/core/styles";
 import MainPageDrawer from "./appBar/MainPageDrawer";
-import useLoggedIn from "../../hooks/useLoggedIn";
+import {LoggedInContext} from "../../utils/Providers";
 
 const useStyles = makeStyles(() =>
     createStyles({
@@ -18,13 +19,13 @@ const useStyles = makeStyles(() =>
     })
 )
 export type MainPageAppBarProps = {
-  title: string,
+  title: ReactNode,
   buttons?: ReactNode
 }
 
 export default function AppBar({title, buttons}: MainPageAppBarProps) {
   const classes = useStyles();
-  const loggedIn = useLoggedIn();
+  const {loggedIn} = useContext(LoggedInContext);
   return <>
     <MuiAppBar.default position="static">
       <Toolbar>
