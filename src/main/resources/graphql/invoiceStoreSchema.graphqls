@@ -11,6 +11,7 @@ type Query {
 type Mutation {
     createInvoice(input: NewInvoice!):Invoice
     updateInvoice(updated: InvoiceUpdate!):Invoice
+    deleteInvoice(id: ID!):Boolean
 }
 
 type Invoice {

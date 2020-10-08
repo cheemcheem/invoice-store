@@ -8,8 +8,8 @@ public class GraphQLInvoiceDTO {
   private String id;
   private String date;
   private String name;
-  private Float total;
-  private Float vatTotal;
+  private Double total;
+  private Double vatTotal;
   private Boolean archived;
   private GraphQLInvoiceFileDTO invoiceFile;
 

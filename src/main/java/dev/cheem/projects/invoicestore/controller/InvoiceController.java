@@ -90,19 +90,6 @@ public class InvoiceController {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 
-  @GetMapping("/details/{invoiceDetailsId}")
-  public ResponseEntity<InvoiceDetailsDTO> getInvoice(
-      @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceUploadController.getInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
-    var optional = invoiceDetailsStorageService.getInvoiceDetails(invoiceDetailsId, invoiceUserId);
-
-    return ResponseEntity.of(optional);
-
-  }
-
   @Transactional
   @SneakyThrows
   @GetMapping("/file/{invoiceDetailsId}")
@@ -164,81 +151,5 @@ public class InvoiceController {
         .body(new ByteArrayResource(csvData.get().getBytes()));
   }
 
-  @GetMapping("/all")
-  public ResponseEntity<List<BasicInvoiceDetailsDTO>> getInvoiceList(
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceUploadController.getInvoiceList");
-    return ResponseEntity.ok(invoiceDetailsStorageService.getAllInvoiceDetails(invoiceUserId));
-  }
-
-  @GetMapping("/archived")
-  public ResponseEntity<List<BasicInvoiceDetailsDTO>> getArchivedInvoiceList(
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceUploadController.getArchivedInvoiceList");
-    return ResponseEntity.ok(invoiceDetailsStorageService.getArchivedInvoiceDetails(invoiceUserId));
-  }
-
-  @PutMapping("/archive/{invoiceDetailsId}")
-  public ResponseEntity<String> archiveInvoice(
-      @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceController.archiveInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
-
-    var optional = invoiceDetailsStorageService.archiveInvoice(invoiceDetailsId, invoiceUserId);
-
-    if (!optional) {
-      return ResponseEntity.notFound().build();
-    }
-
-    return ResponseEntity.noContent().build();
-
-  }
-
-  @PutMapping("/restore/{invoiceDetailsId}")
-  public ResponseEntity<String> restoreInvoice(
-      @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceController.restoreInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
-
-    var optional = invoiceDetailsStorageService.restoreInvoice(invoiceDetailsId, invoiceUserId);
-
-    if (!optional) {
-      return ResponseEntity.notFound().build();
-    }
-
-    return ResponseEntity.noContent().build();
-
-  }
-
-  @DeleteMapping("/delete/{invoiceDetailsId}")
-  public ResponseEntity<String> deleteInvoice(
-      @PathVariable String invoiceDetailsId,
-      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) Long invoiceUserId
-  ) {
-    log.info("InvoiceController.deleteInvoice");
-    log.debug("invoiceDetailsId = " + invoiceDetailsId);
-
-    var optionalDeleted = invoiceDetailsStorageService
-        .deleteInvoiceDetails(invoiceDetailsId, invoiceUserId);
-
-    if (optionalDeleted.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-
-    var deletedDetails = optionalDeleted.get();
-
-    if (deletedDetails) {
-      return ResponseEntity.noContent().build();
-    }
-
-    return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
-
-  }
 
 }

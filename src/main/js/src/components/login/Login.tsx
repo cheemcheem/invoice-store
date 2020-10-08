@@ -1,11 +1,12 @@
 import React, {useMemo} from "react";
+import {useContext} from "react";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import {Skeleton} from "@material-ui/lab";
-import useLoggedIn from "../../hooks/useLoggedIn";
 import {Redirect} from "react-router-dom";
 import GoogleButton from 'react-google-button'
+import {LoggedInContext} from "../../utils/Providers";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -33,7 +34,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function Login() {
   const classes = useStyles();
-  const loggedIn = useLoggedIn();
+  const {loggedIn} = useContext(LoggedInContext);
 
   const href = useMemo(() => {
     let port = (window.location.port ? ':' + window.location.port : '');

@@ -1,6 +1,4 @@
-import {useSnackbar} from "notistack";
-import React, {useCallback, useMemo, useState} from "react";
-import useRedirect from "../../hooks/useRedirect";
+import React, {useMemo, useState} from "react";
 import * as Cookie from "js-cookie";
 import Grid from "@material-ui/core/Grid";
 import Card from "@material-ui/core/Card";
@@ -74,17 +72,26 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     minWidth: "100%"
   },
 }));
-export default function Create() {
-  const classes = useStyles();
-  const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
+export type CreateState = {
+  invoiceDate: Date,
+  invoiceName: string,
+  invoiceTotalVAT: string,
+  invoiceTotal: string,
+  invoiceFile: any
+};
+export type CreateProps = {
+  submit: (values: CreateState) => void
+}
+export default function Create({submit}: CreateProps) {
+  const classes = useStyles();
   const [values, setValues] = useState({
     invoiceDate: new Date(),
     invoiceName: '',
     invoiceTotalVAT: '',
     invoiceTotal: '',
-    invoiceFile: '' as any
-  });
+    invoiceFile: ''
+  } as CreateState);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValues({
@@ -93,51 +100,11 @@ export default function Create() {
     });
   };
 
-  const {component, triggerRedirect} = useRedirect();
-
-  const submit = useCallback(() => {
-    const formData = new FormData();
-
-    Object.keys(values).forEach((name) => {
-      if (name === "invoiceDate") {
-        return formData.append(name, (values)[name].toISOString().split("T")[0]);
-      }
-      return formData.append(name, (values as any)[name]);
-    })
-
-    const key = enqueueSnackbar("Uploading invoice.", {variant: "info", persist: true});
-    fetch(`/api/invoice/new`, {
-      method: "POST",
-      headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))},
-      body: formData
-    })
-    .then(response => {
-      closeSnackbar(key);
-      if (response.status === 413) {
-        enqueueSnackbar("File size too large!", {variant: "warning"});
-      } else if (response.status === 400) {
-        enqueueSnackbar("Invalid file.", {variant: "error"});
-      } else if (!(response.status === 200 || response.status === 303 || response.status === 404)) {
-        throw new Error(`Response status ${response.status}`);
-      } else {
-        enqueueSnackbar("Created invoice!", {variant: "success"});
-        triggerRedirect(new URL(response.url).pathname);
-      }
-    })
-    .catch((e) => {
-      console.log({e})
-      closeSnackbar(key);
-      enqueueSnackbar("Failed to create invoice.", {variant: "error"});
-    })
-    ;
-  }, [values, triggerRedirect, enqueueSnackbar, closeSnackbar]);
-
   const dropZoneChange = useMemo(() => (files: File[]) => {
     setValues({...values, invoiceFile: files[0]});
   }, [values, setValues]);
 
   return <>
-    {component}
     <Grid className={classes.grid}
           container
           direction="row"
@@ -146,7 +113,7 @@ export default function Create() {
       <Card className={classes.cardContent}>
         <form className={classes.form}>
           <div className={classes.subForm}
-               onKeyPress={event => event.key === 'Enter' && submit()}>
+               onKeyPress={event => event.key === 'Enter' && submit(values)}>
             <FormControl className={classes.formItem}>
               <ErrorBoundary renderError={<Typography variant="h6">error</Typography>}>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -227,7 +194,7 @@ export default function Create() {
                     type="button"
                     variant="outlined"
                     color="primary"
-                    onClick={submit}
+                    onClick={() => submit(values)}
                     startIcon={<CloudUploadIcon/>}
                     disableElevation>
               Create

@@ -13,8 +13,9 @@ import InfoIcon from '@material-ui/icons/Info';
 import React, {useCallback, useState} from "react";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import Avatar from "@material-ui/core/Avatar";
-import {gql, useQuery} from '@apollo/client';
+import {useQuery} from '@apollo/client';
 import {Skeleton} from "@material-ui/lab";
+import {GET_USER} from "../../../utils/Queries";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -45,20 +46,11 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 )
 
-const USER = gql`
-    query {
-        user {
-            name
-            picture
-        }
-    }
-`;
-
 export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
   const classes = useStyles();
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = useCallback(() => setMenuOpen(!menuOpen), [menuOpen, setMenuOpen]);
-  const {loading, error, data} = useQuery(USER);
+  const {loading, error, data} = useQuery(GET_USER);
   return <>
     <IconButton edge="start"
                 className={classes.menuButton}
@@ -74,7 +66,9 @@ export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
           <div>
             {
               error
-                  ? <Skeleton className={classes.failedAvatar}/>
+                  ? <ListItemLink
+                      primary={<Skeleton className={classes.loadingAvatarText} variant="text" animation={false}/>}
+                      icon={<Avatar><Skeleton variant={"circle"} animation={false}/></Avatar>}/>
                   : loading
                   ? <ListItemLink
                       primary={<Skeleton className={classes.loadingAvatarText} variant="text"/>}

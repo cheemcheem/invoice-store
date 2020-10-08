@@ -75,8 +75,14 @@ public class GraphQLInvoiceService {
   ) {
     log.debug("GraphQLInvoiceService.updateInvoice");
     var updatedInvoice = graphQLMappingService.mapUpdateInputFields().apply(input);
-    var existingInvoice = invoiceDetailsRepository.getOne(updatedInvoice.getInvoiceDetailsId());
 
+    var optionalExistingInvoice = invoiceDetailsRepository
+        .findById(updatedInvoice.getInvoiceDetailsId());
+    if (optionalExistingInvoice.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var existingInvoice = optionalExistingInvoice.get();
     if (!existingInvoice.getInvoiceUser().getUserId().equals(userId)) {
       return Optional.empty();
     }
@@ -88,5 +94,21 @@ public class GraphQLInvoiceService {
     return Optional.of(
         graphQLMappingService.mapInvoiceFields(fields).apply(saved)
     );
+  }
+
+  public Boolean deleteInvoice(Long userId, String id) {
+    log.debug("GraphQLInvoiceService.deleteInvoice");
+    var optionalInvoice = invoiceDetailsRepository.findById(id);
+    if (optionalInvoice.isEmpty()) {
+      return false;
+    }
+
+    var invoice = optionalInvoice.get();
+    if (!invoice.getInvoiceUser().getUserId().equals(userId)) {
+      return false;
+    }
+
+    invoiceDetailsRepository.delete(invoice);
+    return true;
   }
 }

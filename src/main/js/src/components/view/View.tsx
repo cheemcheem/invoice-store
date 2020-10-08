@@ -1,13 +1,8 @@
 import {makeStyles} from "@material-ui/core/styles";
 import {Theme} from "@material-ui/core/styles";
 import {createStyles} from "@material-ui/core/styles";
-import {useSnackbar} from "notistack";
-import useRedirect from "../../hooks/useRedirect";
 import {useState} from "react";
-import {useCallback} from "react";
 import React from "react";
-import * as Cookie from "js-cookie";
-import download from "downloadjs";
 import Grid from "@material-ui/core/Grid";
 import Card from "@material-ui/core/Card";
 import CardActionArea from "@material-ui/core/CardActionArea";
@@ -24,8 +19,6 @@ import RestoreIcon from "@material-ui/icons/Restore";
 import ArchiveIcon from "@material-ui/icons/Archive";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {Invoice} from "../../utils/Types";
-import {useMutation} from '@apollo/client';
-import {ARCHIVE_INVOICE} from "../../utils/Queries";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   grid: {
@@ -66,74 +59,15 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 type ViewProps = {
   invoice: Invoice | undefined,
   loading: boolean
+  archiveButton: () => void,
+  deleteButton: () => void,
+  downloadButton: () => void
 }
 
-export default function View({invoice, loading}: ViewProps) {
+export default function View({invoice, loading, archiveButton, deleteButton, downloadButton}: ViewProps) {
   const classes = useStyles();
-  const {enqueueSnackbar, closeSnackbar} = useSnackbar();
-  const {component, triggerRedirect} = useRedirect();
+
   const [canRender, setCanRender] = useState(true);
-  const [setArchived] = useMutation(ARCHIVE_INVOICE);
-  const archiveButton = useCallback(() => {
-    if (loading) {
-      return;
-    }
-    const archived = invoice?.archived;
-    setArchived({
-      variables: {
-        updated: {
-          id: invoice?.id,
-          archived: !archived
-        }
-      }
-    })
-    .catch(() => {
-      if (archived) {
-        enqueueSnackbar("Failed to restore invoice.", {variant: "error"})
-      } else {
-        enqueueSnackbar("Failed to archive invoice.", {variant: "error"})
-      }
-    })
-  }, [invoice, enqueueSnackbar, setArchived, loading]);
-
-  const deleteButton = useCallback(() => {
-    fetch(`/api/invoice/delete/${invoice?.id}`, {
-      method: "DELETE",
-      headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
-    })
-    .then((response) => {
-      if (response.status === 406) {
-        enqueueSnackbar("Failed to delete, needs to be archived first.", {variant: "error"})
-      } else {
-        enqueueSnackbar("Deleted invoice.", {variant: "warning"})
-        triggerRedirect("/all");
-      }
-    })
-    .catch(() => {
-      enqueueSnackbar("Failed to delete, unknown error.", {variant: "error"})
-    })
-  }, [invoice, enqueueSnackbar, triggerRedirect]);
-
-  const downloadButton = useCallback(() => {
-    if (!invoice?.invoiceFile) {
-      return enqueueSnackbar("Can't download, no file.", {variant: "warning"})
-    }
-    const key = enqueueSnackbar("Starting download...", {variant: "info", persist: true})
-    fetch(`/api/invoice/file/${invoice?.id}`)
-    .then(response => response.blob())
-    .then(blob => {
-      download(blob, invoice?.invoiceFile?.name, invoice?.invoiceFile?.type)
-    })
-    .then(() => {
-      closeSnackbar(key);
-      enqueueSnackbar("Download complete.", {variant: "success"});
-    })
-    .catch(() => {
-      closeSnackbar(key);
-      enqueueSnackbar("Failed to download.", {variant: "error"});
-    })
-  }, [invoice, enqueueSnackbar, closeSnackbar]);
-
   const hasFile = !loading && invoice!.invoiceFile !== undefined && invoice!.invoiceFile !== null;
 
   return <>
@@ -189,10 +123,7 @@ export default function View({invoice, loading}: ViewProps) {
             </Button>
           </CardActions>
         </CardContent>
-
       </Card>
-
     </Grid>
-    {component}
   </>
 }

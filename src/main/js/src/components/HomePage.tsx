@@ -1,12 +1,13 @@
 import React from "react";
+import {useContext} from "react";
 import Page from "./common/Page";
 import Home from "./home/Home";
-import useLoggedIn from "../hooks/useLoggedIn";
 import {Redirect} from "react-router-dom";
+import {LoggedInContext} from "../utils/Providers";
 
 export default function HomePage() {
 
-  const loggedIn = useLoggedIn();
+  const {loggedIn} = useContext(LoggedInContext);
 
   if (loggedIn) {
     return <Redirect to={"/all"}/>

@@ -11,7 +11,13 @@ export type Invoice = {
   archived: boolean
 }
 export type BasicInvoice = {
-  invoiceId: string,
-  invoiceDate: string,
-  invoiceName: string
+  id: string,
+  date: string,
+  name: string
+  archived: boolean
+}
+export type User = {
+  id: string,
+  name: string,
+  picture: string
 }

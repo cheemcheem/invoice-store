@@ -60,6 +60,7 @@ public class GraphQLConfig {
         .type("Mutation", typeWiring -> typeWiring
             .dataFetcher("createInvoice", graphQLDataFetchers.createInvoiceDataFetcher())
             .dataFetcher("updateInvoice", graphQLDataFetchers.updateInvoiceDataFetcher())
+            .dataFetcher("deleteInvoice", graphQLDataFetchers.deleteInvoiceDataFetcher())
         )
         .build();
   }

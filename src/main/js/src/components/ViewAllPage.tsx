@@ -1,16 +1,19 @@
 import Page from "./common/Page";
 import React, {useCallback, useMemo} from "react";
 import ViewAll from "./viewAll/ViewAll";
-import {ViewAllProps} from "./viewAll/ViewAll";
 import AppBarMoreButton from "./common/AppBarMoreButton";
 import useRedirect from "../hooks/useRedirect";
 import {useSnackbar} from "notistack";
 import download from "downloadjs";
 import AddIcon from "@material-ui/icons/Add";
 import GetAppIcon from '@material-ui/icons/GetApp';
+import {useQuery} from "@apollo/client";
+import {BasicInvoice} from "../utils/Types";
+import {GET_ALL_INVOICES} from "../utils/Queries";
 
-export default function ViewAllPage(props: ViewAllProps) {
-  const title = props.archived ? "Archive" : "Active Invoices";
+export type ViewAllPageProps = { archived?: boolean };
+export default function ViewAllPage({archived = false}: ViewAllPageProps) {
+  const title = archived ? "Archive" : "Active Invoices";
   const {enqueueSnackbar, closeSnackbar} = useSnackbar();
   const {component, triggerRedirect} = useRedirect();
 
@@ -44,7 +47,7 @@ export default function ViewAllPage(props: ViewAllProps) {
   }, [enqueueSnackbar, closeSnackbar]);
 
   const buttons = useMemo(() => {
-    if (props.archived) {
+    if (archived) {
       return <></>;
     }
     const options = [
@@ -54,10 +57,19 @@ export default function ViewAllPage(props: ViewAllProps) {
     return <>
       <AppBarMoreButton options={options}/>
     </>
-  }, [triggerRedirect, downloadCSV, props.archived]);
+  }, [triggerRedirect, downloadCSV, archived]);
+
+  const {loading, error, data, refetch} = useQuery<{ user: { invoices: BasicInvoice[] } }>(GET_ALL_INVOICES);
+
+  if (error) {
+    // wait for login todo count failed attempts and redirect to login page eventually
+    setTimeout(refetch, 1000);
+  }
 
   return <Page title={title} buttons={buttons}>
-    {ViewAll(props)}
+    <ViewAll archived={archived}
+             allInvoices={data?.user?.invoices.filter(i => i.archived === archived) ?? []}
+             loading={loading || (error !== undefined)}/>
     {component}
   </Page>;
 }

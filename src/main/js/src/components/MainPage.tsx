@@ -4,6 +4,8 @@ import {createStyles, makeStyles} from "@material-ui/core/styles";
 import ErrorBoundary from "./common/ErrorBoundary";
 import SuspenseRoute from "./main/SuspenseRoute";
 import HomePage from "./HomePage";
+import {LoggedInContext} from "../utils/Providers";
+import useLoggedIn from "../hooks/useLoggedIn";
 
 const CreatePage = lazy(() => import("./CreatePage"));
 const ViewPage = lazy(() => import("./ViewPage"));
@@ -29,22 +31,25 @@ const useStyles = makeStyles(() =>
 
 export default function MainPage() {
   const classes = useStyles();
+  const loggedIn = useLoggedIn();
 
   return <MainPageErrorBoundary>
     <div className={classes.root}>
-      <BrowserRouter>
-        <Switch>
-          <SuspenseRoute auth path="/all"><ViewAllPage/></SuspenseRoute>
-          <SuspenseRoute auth path="/archived"><ViewAllPage archived/></SuspenseRoute>
-          <SuspenseRoute auth path="/new"><CreatePage/></SuspenseRoute>
-          <SuspenseRoute auth path="/logout"><LogoutPage/></SuspenseRoute>
-          <SuspenseRoute auth path="/view/:invoiceId"><ViewPage/></SuspenseRoute>
-          <SuspenseRoute path="/login"><LoginPage/></SuspenseRoute>
-          <SuspenseRoute path="/privacy"><PrivacyPolicyPage/></SuspenseRoute>
-          <SuspenseRoute path="/error"><ErrorPage/></SuspenseRoute>
-          <Route path="/"><HomePage/></Route>
-        </Switch>
-      </BrowserRouter>
+      <LoggedInContext.Provider value={loggedIn}>
+        <BrowserRouter>
+          <Switch>
+            <SuspenseRoute auth path="/all"><ViewAllPage/></SuspenseRoute>
+            <SuspenseRoute auth path="/archived"><ViewAllPage archived/></SuspenseRoute>
+            <SuspenseRoute auth path="/new"><CreatePage/></SuspenseRoute>
+            <SuspenseRoute auth path="/logout"><LogoutPage/></SuspenseRoute>
+            <SuspenseRoute auth path="/view/:invoiceId"><ViewPage/></SuspenseRoute>
+            <SuspenseRoute path="/login"><LoginPage/></SuspenseRoute>
+            <SuspenseRoute path="/privacy"><PrivacyPolicyPage/></SuspenseRoute>
+            <SuspenseRoute path="/error"><ErrorPage/></SuspenseRoute>
+            <Route path="/"><HomePage/></Route>
+          </Switch>
+        </BrowserRouter>
+      </LoggedInContext.Provider>
     </div>
   </MainPageErrorBoundary>
 }

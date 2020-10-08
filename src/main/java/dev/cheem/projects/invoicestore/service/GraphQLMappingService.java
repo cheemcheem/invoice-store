@@ -43,10 +43,10 @@ public class GraphQLMappingService {
             graphQLInvoiceDTO.setName(invoiceDetails.getInvoiceName());
             break;
           case "total":
-            graphQLInvoiceDTO.setTotal(invoiceDetails.getInvoiceTotal().floatValue());
+            graphQLInvoiceDTO.setTotal(invoiceDetails.getInvoiceTotal().doubleValue());
             break;
           case "vatTotal":
-            graphQLInvoiceDTO.setVatTotal(invoiceDetails.getInvoiceTotalVAT().floatValue());
+            graphQLInvoiceDTO.setVatTotal(invoiceDetails.getInvoiceTotalVAT().doubleValue());
             break;
           case "archived":
             graphQLInvoiceDTO.setArchived(invoiceDetails.getInvoiceArchived());

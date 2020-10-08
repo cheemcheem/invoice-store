@@ -21,7 +21,7 @@ const httpLink = createHttpLink({
   uri: '/api/graphql',
 });
 
-const authLink = setContext((_, { headers }) => {
+const authLink = setContext((_, {headers}) => {
   const token = Cookies.get("XSRF-TOKEN");
   return {
     headers: {

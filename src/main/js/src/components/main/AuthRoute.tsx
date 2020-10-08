@@ -1,11 +1,11 @@
 import React from "react";
+import {useContext} from "react";
 import {Redirect, Route} from "react-router-dom";
 import ErrorBoundary from "../common/ErrorBoundary";
-import useLoggedIn from "../../hooks/useLoggedIn";
+import {LoggedInContext} from "../../utils/Providers";
 
 export default function AuthRoute({children, path}: React.PropsWithChildren<{ path: string }>) {
-
-  const loggedIn = useLoggedIn();
+  const {loggedIn} = useContext(LoggedInContext);
 
   return <AuthRouteErrorBoundary>
     <Route path={path}>

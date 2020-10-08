@@ -35,7 +35,9 @@ public class GraphQLDataFetchers {
       log.debug("GraphQLDataFetchers.getInvoicesDataFetcher");
       var userId = graphQLUserService.getUserId();
       var fields = getFields(dataFetchingEnvironment);
-      return graphQLInvoiceService.getAllInvoiceDetailsGQL(userId, fields);
+      var allInvoiceDetailsGQL = graphQLInvoiceService.getAllInvoiceDetailsGQL(userId, fields);
+      log.debug("GraphQLDataFetchers.getInvoicesDataFetcher finished");
+      return allInvoiceDetailsGQL;
     };
   }
 
@@ -105,6 +107,18 @@ public class GraphQLDataFetchers {
           updated,
           fields
       ).orElse(null);
+    };
+  }
+  public DataFetcher<Boolean> deleteInvoiceDataFetcher() {
+    return dataFetchingEnvironment -> {
+      log.debug("GraphQLDataFetchers.updateInvoiceDataFetcher");
+      var userId = graphQLUserService.getUserId();
+      var id = (String) dataFetchingEnvironment.getArgument("id");
+
+      return graphQLInvoiceService.deleteInvoice(
+          userId,
+          id
+      );
     };
   }
 }
