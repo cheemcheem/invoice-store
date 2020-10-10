@@ -1,5 +1,5 @@
 import React, {useMemo} from "react";
-import {useContext} from "react";
+import {useContext,useCallback} from "react";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
@@ -45,6 +45,10 @@ export default function Login() {
     return window.location.protocol + '//' + window.location.hostname + port + '/oauth2/authorization/google';
   }, []);
 
+  const logInAndRefresh = useCallback(() => {
+    window.location.href = href;
+  }, [href]);
+
   if (loggedIn === true) {
     return <Redirect to="/"/>
   }
@@ -58,7 +62,7 @@ export default function Login() {
           alignItems="center">
       <Paper className={classes.paper}>
         {(loggedIn === false)
-            ? <GoogleButton onClick={() => window.location.href = href}
+            ? <GoogleButton onClick={logInAndRefresh}
                             className={classes.button}>Log in with Google (OAuth2)</GoogleButton>
             : <Skeleton className={classes.button} variant="rect" animation="wave"/>
         }

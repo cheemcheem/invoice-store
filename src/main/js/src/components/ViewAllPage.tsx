@@ -59,7 +59,7 @@ export default function ViewAllPage({archived = false}: ViewAllPageProps) {
     </>
   }, [triggerRedirect, downloadCSV, archived]);
 
-  const {loading, error, data, refetch} = useQuery<{ user: { invoices: BasicInvoice[] } }>(GET_ALL_INVOICES);
+  const {loading, error, data, refetch} = useQuery<{ user: { invoices: BasicInvoice[] } }>(GET_ALL_INVOICES, {pollInterval: 60000});
 
   if (error) {
     // wait for login todo count failed attempts and redirect to login page eventually
