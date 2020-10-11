@@ -65,7 +65,6 @@ export default function ViewPage() {
     })
     .then(({data}) => {
       if (data.deleteInvoice) {
-        enqueueSnackbar("Deleted invoice.", {variant: "warning"})
         triggerRedirect("/all");
       } else {
         enqueueSnackbar("Failed to delete.", {variant: "error"})
