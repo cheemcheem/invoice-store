@@ -1,5 +1,5 @@
 import {useSnackbar} from "notistack";
-import {useCallback, useEffect} from "react";
+import {useEffect} from "react";
 import {useContext} from "react";
 import * as Cookie from "js-cookie";
 import useRedirect from "../../hooks/useRedirect";
@@ -10,31 +10,24 @@ export default function Logout() {
   const {refetch} = useContext(LoggedInContext);
   const {component, triggerRedirect} = useRedirect();
 
-  const logout = useCallback(() => {
+  useEffect(() => {
     let rendered = true;
+    const redirectIfRendered = (to: string) => rendered && triggerRedirect(to);
     fetch(`/logout`, {
       method: "POST",
       headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
     })
-    .then(() => {
-      console.log({step: "1", rendered})
-      if (rendered) {
-        return refetch();
-      }
-    })
+    .then(refetch)
+    .then(() => redirectIfRendered("/login"))
     .catch(() => {
-      console.log({step: "2", rendered})
-      if (rendered) {
-        enqueueSnackbar("Failed to log out.", {variant: "error"});
-        triggerRedirect("/all")
-      }
+      enqueueSnackbar("Failed to log out.", {variant: "error"});
+      redirectIfRendered("/all");
+      return refetch();
     });
     return () => {
       rendered = false
     };
   }, [enqueueSnackbar, triggerRedirect, refetch]);
-
-  useEffect(logout, [logout]);
 
   return component;
 }
