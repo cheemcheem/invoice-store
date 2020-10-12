@@ -13,11 +13,17 @@ export const useStyles = makeStyles((theme: Theme) =>
       row: {
         padding: theme.spacing(2),
         width: "100%",
-        backgroundColor: theme.palette.grey["100"],
+        backgroundColor: theme.palette.grey["50"],
+        '&:hover':{
+          backgroundColor: theme.palette.grey["200"],
+        },
         height: 80,
       },
       darkRow: {
         backgroundColor: theme.palette.grey["300"],
+        '&:hover':{
+          backgroundColor: theme.palette.grey["200"],
+        },
         color: theme.palette.text.primary
       },
     })
