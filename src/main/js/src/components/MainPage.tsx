@@ -14,6 +14,7 @@ const PrivacyPolicyPage = lazy(() => import("./PrivacyPolicyPage"));
 const LogoutPage = lazy(() => import("./LogoutPage"));
 const ErrorPage = lazy(() => import("./ErrorPage"));
 const ViewAllPage = lazy(() => import("./ViewAllPage"));
+const NotFoundPage = lazy(() => import ("./NotFoundPage"));
 
 const useStyles = makeStyles(() =>
     createStyles({
@@ -46,7 +47,8 @@ export default function MainPage() {
             <SuspenseRoute path="/login"><LoginPage/></SuspenseRoute>
             <SuspenseRoute path="/privacy"><PrivacyPolicyPage/></SuspenseRoute>
             <SuspenseRoute path="/error"><ErrorPage/></SuspenseRoute>
-            <Route path="/"><HomePage/></Route>
+            <Route exact path="/"><HomePage/></Route>
+            <SuspenseRoute auth path="/:invalidPath"><NotFoundPage/></SuspenseRoute>
           </Switch>
         </BrowserRouter>
       </LoggedInContext.Provider>

@@ -1,5 +1,6 @@
 import React from "react";
 import {useCallback} from "react";
+import {useMemo} from "react";
 import {Redirect, useParams} from "react-router-dom";
 import Page from "./common/Page";
 import View from "./view/View";
@@ -17,6 +18,7 @@ import {useSnackbar} from "notistack";
 import {createStyles, makeStyles} from "@material-ui/core/styles";
 import useRedirect from "../hooks/useRedirect";
 import download from "downloadjs";
+import NotFound from "./notFound/NotFound";
 
 const useStyles = makeStyles(() => createStyles({
   skeletonText: {
@@ -97,29 +99,49 @@ export default function ViewPage() {
     })
   }, [data, enqueueSnackbar, closeSnackbar, loading]);
 
+  const notFound = useMemo(() => data?.invoiceById === null, [data]);
 
-  if (data?.invoiceById === null) {
-    enqueueSnackbar("Invoice not found!", {variant: "warning"})
-    return <Redirect to="/all"/>;
-  }
+  const title = useMemo(() => {
+    console.log({loading, notFound, data})
+    if (loading) {
+      return <Skeleton className={classes.skeletonText}/>;
+    } else if (notFound) {
+      return `Not Found`;
+    } else {
+      return `View ${data?.invoiceById?.name ?? ""}`;
+    }
+  }, [loading, classes.skeletonText, notFound, data]);
+
+  const buttons = useMemo(() => {
+    let archived;
+
+    if (loading) {
+      archived = undefined;
+    } else if (notFound) {
+      archived = false;
+    } else {
+      archived = data?.invoiceById?.archived;
+    }
+
+    return <AppBarBackButton archived={archived}/>
+  }, [data, loading, notFound]);
+
 
   if (error) {
     enqueueSnackbar("Failed to load invoice!", {variant: "error"})
     return <Redirect to="/all"/>;
   }
 
-  return <Page title={loading
-      ? <Skeleton className={classes.skeletonText}/>
-      : `View ${data!.invoiceById?.name ?? ""}`}
-               buttons={
-                 <AppBarBackButton archived={data ? data!.invoiceById?.archived : undefined}/>
-               }>
-    <View invoice={data?.invoiceById ?? undefined}
-          loading={loading}
-          archiveButton={archiveButton}
-          deleteButton={deleteButton}
-          downloadButton={downloadButton}
-    />
+  return <Page title={title}
+               buttons={buttons}>
+    {notFound
+        ? <NotFound/>
+        : <View invoice={data?.invoiceById ?? undefined}
+                loading={loading}
+                archiveButton={archiveButton}
+                deleteButton={deleteButton}
+                downloadButton={downloadButton}/>
+    }
     {component}
   </Page>
 }
