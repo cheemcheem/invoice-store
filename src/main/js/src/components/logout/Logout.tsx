@@ -17,11 +17,13 @@ export default function Logout() {
       headers: {"X-XSRF-TOKEN": String(Cookie.get("XSRF-TOKEN"))}
     })
     .then(() => {
+      console.log({step: "1", rendered})
       if (rendered) {
         return refetch();
       }
     })
     .catch(() => {
+      console.log({step: "2", rendered})
       if (rendered) {
         enqueueSnackbar("Failed to log out.", {variant: "error"});
         triggerRedirect("/all")

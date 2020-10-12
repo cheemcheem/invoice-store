@@ -1,10 +1,9 @@
 import React, {useMemo} from "react";
-import {useContext,useCallback} from "react";
+import {useCallback, useContext} from "react";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import {Skeleton} from "@material-ui/lab";
-import {Redirect} from "react-router-dom";
 import GoogleButton from 'react-google-button'
 import {LoggedInContext} from "../../utils/Providers";
 
@@ -48,10 +47,6 @@ export default function Login() {
   const logInAndRefresh = useCallback(() => {
     window.location.href = href;
   }, [href]);
-
-  if (loggedIn === true) {
-    return <Redirect to="/"/>
-  }
 
   return <div className={classes.root}>
     <Grid className={classes.main}

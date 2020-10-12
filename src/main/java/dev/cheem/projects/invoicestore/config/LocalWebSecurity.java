@@ -1,11 +1,13 @@
 package dev.cheem.projects.invoicestore.config;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
@@ -33,16 +35,20 @@ public class LocalWebSecurity extends WebSecurityConfigurerAdapter {
         )
         .logout(l -> l
             .logoutUrl("/logout")
-            .logoutSuccessHandler(this::handleLogin)
+            .logoutSuccessHandler(this::handleSuccess)
         )
         .oauth2Login(o -> o
-            .successHandler(this::handleLogin)
+            .successHandler(this::handleSuccess)
         )
     ;
   }
 
-  private void handleLogin(HttpServletRequest request, HttpServletResponse response,
-      Authentication authentication) {
-    response.setStatus(HttpStatus.NO_CONTENT.value());
+  private void handleSuccess(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) throws IOException {
+    var referrer = request.getHeader("referer");
+    if (Objects.nonNull(referrer)) {
+      var uri = URI.create(referrer);
+      response.sendRedirect("http://" + uri.getHost() + ":" + uri.getPort());
+    }
   }
 }

@@ -4,8 +4,7 @@ import {User} from "../utils/Types";
 
 export default function useLoggedIn() {
   const {data, loading, error, refetch} = useQuery<{ user: User }>(GET_USER, {
-    fetchPolicy: "cache-first",
-    pollInterval: 10000
+    fetchPolicy: "cache-first"
   });
 
   let loggedIn: "not checked" | boolean;
