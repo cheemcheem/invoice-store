@@ -60,5 +60,10 @@
     "@types/js-cookie": "^2.2.6",
     "@types/react-router-dom": "^5.1.5",
     "@types/react-window": "^1.8.2"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "/node_modules/apollo3-cache-persist/(?!(lib))"
+    ]
   }
 }
