@@ -69,17 +69,16 @@ export default function ViewAll({archived, allInvoices, loading}: ViewAllProps) 
                 {RenderRow}
               </FixedSizeList>
           : <List className={classes.loadingList}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map((index) => <>
-              <ListItem key={index}
-                        className={rowClasses.row + " " + (index % 2 === 1 && rowClasses.darkRow)}>
-                <ListItemText primary={<Skeleton/>}
-                              secondary={<Skeleton animation="wave"/>}
-                              classes={{
-                                primary: classes.primaryRow,
-                                secondary: classes.secondaryRow
-                              }}/>
-              </ListItem>
-            </>)}
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map((index) =>
+                <ListItem key={index}
+                          className={rowClasses.row + " " + (index % 2 === 1 && rowClasses.darkRow)}>
+                  <ListItemText primary={<Skeleton/>}
+                                secondary={<Skeleton animation="wave"/>}
+                                classes={{
+                                  primary: classes.primaryRow,
+                                  secondary: classes.secondaryRow
+                                }}/>
+                </ListItem>)}
           </List>
       }
     </Card>
