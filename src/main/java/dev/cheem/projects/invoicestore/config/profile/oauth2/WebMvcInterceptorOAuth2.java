@@ -1,4 +1,4 @@
-package dev.cheem.projects.invoicestore.config;
+package dev.cheem.projects.invoicestore.config.profile.oauth2;
 
 import static dev.cheem.projects.invoicestore.util.Constants.DO_NOT_INTERCEPT;
 
@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.util.NumberUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 

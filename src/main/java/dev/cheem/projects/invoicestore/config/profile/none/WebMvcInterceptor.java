@@ -1,4 +1,4 @@
-package dev.cheem.projects.invoicestore.config;
+package dev.cheem.projects.invoicestore.config.profile.none;
 
 import static dev.cheem.projects.invoicestore.util.Constants.DO_NOT_INTERCEPT;
 

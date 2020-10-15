@@ -1,4 +1,4 @@
-package dev.cheem.projects.invoicestore.config;
+package dev.cheem.projects.invoicestore.config.profile.oauth2;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package dev.cheem.projects.invoicestore.config;
+package dev.cheem.projects.invoicestore.config.profile.none;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
