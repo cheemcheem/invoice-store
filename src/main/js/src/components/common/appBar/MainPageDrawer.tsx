@@ -16,6 +16,7 @@ import Avatar from "@material-ui/core/Avatar";
 import {useQuery} from '@apollo/client';
 import {Skeleton} from "@material-ui/lab";
 import {GET_USER} from "../../../utils/Queries";
+import {User} from "../../../utils/Types";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -50,7 +51,7 @@ export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
   const classes = useStyles();
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleMenu = useCallback(() => setMenuOpen(!menuOpen), [menuOpen, setMenuOpen]);
-  const {loading, error, data} = useQuery(GET_USER);
+  const {loading, error, data} = useQuery<{user: User}>(GET_USER);
   return <>
     <IconButton edge="start"
                 className={classes.menuButton}
@@ -76,8 +77,7 @@ export default function MainPageDrawer({loggedIn}: { loggedIn: boolean }) {
                       icon={<Avatar><Skeleton variant={"circle"}/></Avatar>}/>
                   : <ListItemLink primary={data?.user?.name ?? ""}
                                   icon={<Avatar alt={data?.user?.name} src={data?.user?.picture}>{
-                                    data?.user?.name
-                                    .split(" ")
+                                    data?.user?.name?.split(" ")
                                     .map((s: string) => s[0])
                                     .reduce((s1: string, s2: string) => s1 + s2)
                                   }</Avatar>}/>

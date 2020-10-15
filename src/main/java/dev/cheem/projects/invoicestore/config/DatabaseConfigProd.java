@@ -1,16 +1,25 @@
 package dev.cheem.projects.invoicestore.config;
 
+import dev.cheem.projects.invoicestore.model.DatabaseInstance;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("!prod")
+@Profile("prod")
+@Setter
 @Configuration("databaseConfig")
 @Slf4j
-public class DatabaseConfig {
+public class DatabaseConfigProd {
+
+  @Value("${DB_MAX_USER_LIMIT}")
+  private String maxUserLimit;
+
   @Bean
   public Integer maxUserLimit() {
-    return 100;
+    return Integer.valueOf(maxUserLimit);
   }
+
 }

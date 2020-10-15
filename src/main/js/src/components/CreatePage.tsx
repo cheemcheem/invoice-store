@@ -62,8 +62,15 @@ export default function CreatePage() {
       return fetch(`/api/invoice/file/${id}`, {
         method: "PUT",
         headers: {"X-XSRF-TOKEN": Cookies.get("XSRF-TOKEN")!},
-        body: formData
-      }).then(() => id);
+        body: formData,
+        redirect: "manual"
+      }).then((response) => {
+        if (response.status !== 201) {
+          closeSnackbar(key);
+          enqueueSnackbar("Failed to attach file to invoice.", {variant: "error"});
+        }
+        return new Promise<string>(resolve => setTimeout(() => resolve(id), 500))
+      });
     };
 
     createInvoice({

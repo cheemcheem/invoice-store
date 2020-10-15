@@ -64,7 +64,7 @@ public class InvoiceController {
           .path(invoiceDetailsId)
           .build().toUri();
 
-      return ResponseEntity.status(HttpStatus.SEE_OTHER).location(invoiceLocationURI).build();
+      return ResponseEntity.created(invoiceLocationURI).build();
     } catch (StorageException e) {
       if (e.getMessage().startsWith("File is too large")) {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).build();

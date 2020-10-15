@@ -102,7 +102,6 @@ export default function ViewPage() {
   const notFound = useMemo(() => data?.invoiceById === null, [data]);
 
   const title = useMemo(() => {
-    console.log({loading, notFound, data})
     if (loading) {
       return <Skeleton className={classes.skeletonText}/>;
     } else if (notFound) {

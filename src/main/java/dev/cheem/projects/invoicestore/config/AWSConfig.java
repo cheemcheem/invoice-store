@@ -1,98 +1,84 @@
 package dev.cheem.projects.invoicestore.config;
 
+import io.findify.s3mock.S3Mock;
 import java.net.URI;
-import lombok.Data;
-import lombok.Setter;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
+import org.springframework.context.annotation.Profile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 
-@Setter
-@Configuration
+@Profile("!prod")
+@Configuration("awsConfig")
 @Slf4j
 public class AWSConfig {
 
-  @Value("${AWS_S3_BUCKET}")
-  private String bucket;
+  private static final int PORT = 8001;
+  private static final String TEST_ENDPOINT = "http://localhost:" + PORT;
+  private static final String TEST_BUCKET = "bucket";
+  private static final String TEST_REGION = "test_region";
+  private static final String TEST_BUCKET_ROOT = "invoice_store";
+  private static final String TEST_MAX_FILE_LIMIT = "100";
+  private static final String TEST_ACCESS_KEY_ID = "test_access_key_id";
+  private static final String TEST_AWS_SECRET_ACCESS_KEY = "test_aws_secret_access_key";
 
-  @Value("${AWS_REGION}")
-  private String region;
-
-  @Value("${AWS_ENDPOINT}")
-  private String endpoint;
-
-  @Value("${AWS_S3_BUCKET_ROOT}")
-  private String root;
-
-  @Value("${AWS_MAX_FILE_LIMIT}")
-  private String maxFileLimit;
-
-
-  private S3Client S3Client() {
-    return S3Client.builder()
-        .region(Region.of(region))
-        .endpointOverride(URI.create(endpoint))
-        .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
-        .build();
+  static {
+    log.debug("Setting up S3 Mock API.");
+    S3Mock.create(PORT).start();
+    // Handle this async to not block main thread that S3Mock runs on
+    Executors.newSingleThreadExecutor().execute(() -> {
+      var createBucketRequest = CreateBucketRequest.builder().bucket(TEST_BUCKET).build();
+      var s3ClientBuilder = S3Client.builder()
+          .region(Region.of(TEST_REGION))
+          .endpointOverride(URI.create(TEST_ENDPOINT))
+          .serviceConfiguration(builder -> builder.pathStyleAccessEnabled(true))
+          .credentialsProvider(() -> AwsBasicCredentials.create(TEST_ACCESS_KEY_ID,TEST_AWS_SECRET_ACCESS_KEY));
+      try (var s3Client = s3ClientBuilder.build()) {
+        s3Client.createBucket(createBucketRequest);
+      }
+      log.debug("Finished setting up S3 Mock API.");
+    });
   }
-
-  private GetObjectRequest.Builder getS3ObjectRequestBuilder() {
-    return GetObjectRequest.builder().bucket(bucket);
-  }
-
-  private DeleteObjectRequest.Builder deleteS3ObjectRequestBuilder() {
-    return DeleteObjectRequest.builder().bucket(bucket);
-  }
-
-  private PutObjectRequest.Builder putS3ObjectRequestBuilder() {
-    return PutObjectRequest.builder().bucket(bucket);
-  }
-
-  private String s3RootDirectory() {
-    return root;
-  }
-
-  private String s3FileNameMetaTag() {
-    return "original-file-name";
-  }
-
-  private Integer maxFileLimit() {
-    return Integer.valueOf(maxFileLimit);
-  }
-
 
   @Bean
-  public AWSInstance awsInstance() {
-    log.debug("Creating AWSInstance.");
-    var awsInstance = new AWSInstance(
-        S3Client(),
-        getS3ObjectRequestBuilder(),
-        deleteS3ObjectRequestBuilder(),
-        putS3ObjectRequestBuilder(),
-        s3RootDirectory(),
-        s3FileNameMetaTag(),
-        maxFileLimit()
-    );
-    log.debug("Created AWSInstance '{}'.", awsInstance);
-    return awsInstance;
+  public String awsS3Bucket() {
+    return TEST_BUCKET;
   }
 
-  @Data
-  public static class AWSInstance {
+  @Bean
+  public String awsRegion() {
+    return TEST_REGION;
+  }
 
-    private final S3Client S3Client;
-    private final GetObjectRequest.Builder getS3ObjectRequestBuilder;
-    private final DeleteObjectRequest.Builder deleteS3ObjectRequestBuilder;
-    private final PutObjectRequest.Builder putS3ObjectRequestBuilder;
-    private final String s3RootDirectory;
-    private final String s3FileNameMetaTag;
-    private final Integer maxFileLimit;
+  @Bean
+  public String awsEndpoint() {
+    return TEST_ENDPOINT;
+  }
+
+  @Bean
+  public String awsS3BucketRoot() {
+    return TEST_BUCKET_ROOT;
+  }
+
+  @Bean
+  public String awsMaxFileLimit() {
+    return TEST_MAX_FILE_LIMIT;
+  }
+
+  @Bean
+  public String awsAccessKeyId() {
+    return TEST_ACCESS_KEY_ID;
+  }
+
+  @Bean
+  public String awsSecretAccessKey() {
+    return TEST_AWS_SECRET_ACCESS_KEY;
   }
 }

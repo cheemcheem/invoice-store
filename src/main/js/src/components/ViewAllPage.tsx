@@ -10,6 +10,7 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import {useQuery} from "@apollo/client";
 import {BasicInvoice} from "../utils/Types";
 import {GET_ALL_INVOICES} from "../utils/Queries";
+import {useEffect} from "react";
 
 export type ViewAllPageProps = { archived?: boolean };
 export default function ViewAllPage({archived = false}: ViewAllPageProps) {
@@ -65,6 +66,11 @@ export default function ViewAllPage({archived = false}: ViewAllPageProps) {
     // wait for login todo count failed attempts and redirect to login page eventually
     setTimeout(refetch, 1000);
   }
+
+  useEffect(() => {
+    // this keeps the invoice list updated on page refresh
+    refetch();
+  }, [refetch]);
 
   return <Page title={title} buttons={buttons}>
     <ViewAll archived={archived}

@@ -48,3 +48,11 @@ I hope to add:
 1. Categorisation, maybe in the form of searchable tags.
 2. Searching/filtering of invoices, by tag, date, total, etc.
 3. Exporting filtered data to a CSV.
+
+### Profiles
+1. dev (default) - connects to in memory h2 db and in memory s3 bucket
+2. prod - connects to remote postgresql db and remote s3 bucket
+3. remote (default) - no workaround
+4. local - workaround for :3000 and :8080 port issues
+5. no-auth (default) - no password authentication
+6. oauth2 - oauth2 authentication

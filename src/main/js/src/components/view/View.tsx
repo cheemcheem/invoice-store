@@ -157,10 +157,10 @@ export default function View({invoice, loading, archiveButton, deleteButton, dow
       </DialogContent>
       <DialogActions>
         <Button onClick={closeDeleteDialogue(false)} color="primary" autoFocus>
-          Disagree
+          Keep
         </Button>
-        <Button onClick={closeDeleteDialogue(true)} color="primary">
-          Agree
+        <Button onClick={closeDeleteDialogue(true)} color="secondary">
+          Delete
         </Button>
       </DialogActions>
     </Dialog>
