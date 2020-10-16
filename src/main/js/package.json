@@ -17,6 +17,7 @@
     "@types/node": "^12.12.55",
     "@types/react": "^16.9.49",
     "@types/react-dom": "^16.9.8",
+    "apollo3-cache-persist": "^0.6.0",
     "date-fns": "^2.16.1",
     "downloadjs": "^1.4.7",
     "graphql": "^15.3.0",
@@ -59,5 +60,10 @@
     "@types/js-cookie": "^2.2.6",
     "@types/react-router-dom": "^5.1.5",
     "@types/react-window": "^1.8.2"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "/node_modules/apollo3-cache-persist/(?!(lib))"
+    ]
   }
 }

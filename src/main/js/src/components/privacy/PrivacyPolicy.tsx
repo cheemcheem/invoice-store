@@ -35,7 +35,15 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       tldr: {
         padding: 0
-      }
+      },
+      tldrInset: {
+        '&::before': {
+          content: '" "',
+          display: "block",
+          width: theme.spacing(2),
+          minWidth: theme.spacing(2),
+        }
+      },
     }),
 );
 
@@ -89,12 +97,12 @@ export default function PrivacyPolicy() {
           <ListItem className={classes.tldr}>
             <ListItemText primary="The only data we store about you are:"/>
           </ListItem>
-          <ListItem className={classes.tldr}>
-            <ListItemText inset primary="Your unique Google Account ID."
+          <ListItem className={classes.tldr + " " + classes.tldrInset}>
+            <ListItemText primary="Your unique Google Account ID."
                           secondary="So we can tell who owns each invoice"/>
           </ListItem>
-          <ListItem className={classes.tldr}>
-            <ListItemText inset primary="The invoice details and files that you upload"
+          <ListItem className={classes.tldr + " " + classes.tldrInset}>
+            <ListItemText primary="The invoice details and files that you upload"
                           secondary="Until you delete the invoice"/>
           </ListItem>
           <ListItem className={classes.tldr}>

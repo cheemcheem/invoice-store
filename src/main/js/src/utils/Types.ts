@@ -18,6 +18,6 @@ export type BasicInvoice = {
 }
 export type User = {
   id: string,
-  name: string,
-  picture: string
+  name?: string,
+  picture?: string
 }

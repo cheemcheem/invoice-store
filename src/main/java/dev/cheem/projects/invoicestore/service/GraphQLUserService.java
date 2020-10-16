@@ -1,6 +1,6 @@
 package dev.cheem.projects.invoicestore.service;
 
-import dev.cheem.projects.invoicestore.config.AWSConfig.AWSInstance;
+import dev.cheem.projects.invoicestore.model.AWSInstance;
 import dev.cheem.projects.invoicestore.dto.graphql.GraphQLUserDTO;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
 import dev.cheem.projects.invoicestore.repository.UserRepository;

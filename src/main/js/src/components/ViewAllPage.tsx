@@ -1,5 +1,6 @@
 import Page from "./common/Page";
 import React, {useCallback, useMemo} from "react";
+import {useEffect} from "react";
 import ViewAll from "./viewAll/ViewAll";
 import AppBarMoreButton from "./common/AppBarMoreButton";
 import useRedirect from "../hooks/useRedirect";
@@ -66,9 +67,28 @@ export default function ViewAllPage({archived = false}: ViewAllPageProps) {
     setTimeout(refetch, 1000);
   }
 
+  useEffect(() => {
+    // this keeps the invoice list updated on page refresh
+    refetch();
+  }, [refetch]);
+
   return <Page title={title} buttons={buttons}>
     <ViewAll archived={archived}
-             allInvoices={data?.user?.invoices.filter(i => i.archived === archived) ?? []}
+             allInvoices={data?.user?.invoices.filter(i => i.archived === archived).sort((a, b) => {
+               if (a.date < b.date) {
+                 return 1;
+               }
+               if (a.date > b.date) {
+                 return -1;
+               }
+               if (a.name > b.name) {
+                 return 1;
+               }
+               if (a.name < b.name) {
+                 return -1;
+               }
+               return 0;
+             }) ?? []}
              loading={loading || (error !== undefined)}/>
     {component}
   </Page>;

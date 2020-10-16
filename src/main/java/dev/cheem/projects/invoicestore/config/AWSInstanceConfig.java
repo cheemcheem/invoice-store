@@ -1,62 +1,65 @@
 package dev.cheem.projects.invoicestore.config;
 
+import dev.cheem.projects.invoicestore.model.AWSInstance;
 import java.net.URI;
-import lombok.Data;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
+import org.springframework.context.annotation.DependsOn;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-@Setter
+@DependsOn("awsConfig")
+@RequiredArgsConstructor
 @Configuration
 @Slf4j
-public class AWSConfig {
+public class AWSInstanceConfig {
 
-  @Value("${AWS_S3_BUCKET}")
-  private String bucket;
-
-  @Value("${AWS_REGION}")
-  private String region;
-
-  @Value("${AWS_ENDPOINT}")
-  private String endpoint;
-
-  @Value("${AWS_S3_BUCKET_ROOT}")
-  private String root;
-
-  @Value("${AWS_MAX_FILE_LIMIT}")
-  private String maxFileLimit;
-
+  private final String awsS3Bucket;
+  private final String awsRegion;
+  private final String awsEndpoint;
+  private final String awsS3BucketRoot;
+  private final String awsMaxFileLimit;
+  private final String awsAccessKeyId;
+  private final String awsSecretAccessKey;
 
   private S3Client S3Client() {
     return S3Client.builder()
-        .region(Region.of(region))
-        .endpointOverride(URI.create(endpoint))
-        .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+        .region(Region.of(awsRegion))
+        .endpointOverride(URI.create(awsEndpoint))
+        .credentialsProvider(() -> new AwsCredentials() {
+          @Override
+          public String accessKeyId() {
+            return awsAccessKeyId;
+          }
+
+          @Override
+          public String secretAccessKey() {
+            return awsSecretAccessKey;
+          }
+        })
         .build();
   }
 
   private GetObjectRequest.Builder getS3ObjectRequestBuilder() {
-    return GetObjectRequest.builder().bucket(bucket);
+    return GetObjectRequest.builder().bucket(awsS3Bucket);
   }
 
   private DeleteObjectRequest.Builder deleteS3ObjectRequestBuilder() {
-    return DeleteObjectRequest.builder().bucket(bucket);
+    return DeleteObjectRequest.builder().bucket(awsS3Bucket);
   }
 
   private PutObjectRequest.Builder putS3ObjectRequestBuilder() {
-    return PutObjectRequest.builder().bucket(bucket);
+    return PutObjectRequest.builder().bucket(awsS3Bucket);
   }
 
   private String s3RootDirectory() {
-    return root;
+    return awsS3BucketRoot;
   }
 
   private String s3FileNameMetaTag() {
@@ -64,7 +67,7 @@ public class AWSConfig {
   }
 
   private Integer maxFileLimit() {
-    return Integer.valueOf(maxFileLimit);
+    return Integer.valueOf(awsMaxFileLimit);
   }
 
 
@@ -82,17 +85,5 @@ public class AWSConfig {
     );
     log.debug("Created AWSInstance '{}'.", awsInstance);
     return awsInstance;
-  }
-
-  @Data
-  public static class AWSInstance {
-
-    private final S3Client S3Client;
-    private final GetObjectRequest.Builder getS3ObjectRequestBuilder;
-    private final DeleteObjectRequest.Builder deleteS3ObjectRequestBuilder;
-    private final PutObjectRequest.Builder putS3ObjectRequestBuilder;
-    private final String s3RootDirectory;
-    private final String s3FileNameMetaTag;
-    private final Integer maxFileLimit;
   }
 }

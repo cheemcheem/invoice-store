@@ -31,9 +31,8 @@ type InvoiceFile {
 
 type User {
     id: ID!
-    name: String!
-    picture: String!
-    all: String!
+    name: String
+    picture: String
     invoices: [Invoice!]!
 }
 

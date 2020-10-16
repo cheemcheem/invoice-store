@@ -3,6 +3,8 @@ import {Theme} from "@material-ui/core/styles";
 import {createStyles} from "@material-ui/core/styles";
 import {useState} from "react";
 import React from "react";
+import {useCallback} from "react";
+import {useMemo} from "react";
 import Grid from "@material-ui/core/Grid";
 import Card from "@material-ui/core/Card";
 import CardActionArea from "@material-ui/core/CardActionArea";
@@ -19,6 +21,11 @@ import RestoreIcon from "@material-ui/icons/Restore";
 import ArchiveIcon from "@material-ui/icons/Archive";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {Invoice} from "../../utils/Types";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogActions from "@material-ui/core/DialogActions";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   grid: {
@@ -68,6 +75,16 @@ export default function View({invoice, loading, archiveButton, deleteButton, dow
   const classes = useStyles();
 
   const [canRender, setCanRender] = useState(true);
+  const [deleteDialogueOpen, setDeleteDialogueOpen] = useState(false);
+
+  const openDeleteDialogue = useCallback(() => setDeleteDialogueOpen(true), [setDeleteDialogueOpen]);
+  const closeDeleteDialogue = useMemo(() => (shouldDelete: boolean) => () => {
+    if (shouldDelete) {
+      deleteButton();
+    }
+    setDeleteDialogueOpen(false);
+  }, [deleteButton, setDeleteDialogueOpen]);
+
   const hasFile = !loading && invoice!.invoiceFile !== undefined && invoice!.invoiceFile !== null;
 
   return <>
@@ -117,7 +134,7 @@ export default function View({invoice, loading, archiveButton, deleteButton, dow
             </Button>
             <Button disabled={loading || !invoice!.archived}
                     color="secondary"
-                    onClick={deleteButton}
+                    onClick={openDeleteDialogue}
                     startIcon={<DeleteIcon/>}>
               Delete
             </Button>
@@ -125,5 +142,27 @@ export default function View({invoice, loading, archiveButton, deleteButton, dow
         </CardContent>
       </Card>
     </Grid>
+    <Dialog
+        open={deleteDialogueOpen}
+        onClose={closeDeleteDialogue}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+    >
+      <DialogTitle id="alert-dialog-title">{"Delete this invoice?"}</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          Once you have deleted an invoice, its details and attached file will be forever removed
+          from this system.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeDeleteDialogue(false)} color="primary" autoFocus>
+          Keep
+        </Button>
+        <Button onClick={closeDeleteDialogue(true)} color="secondary">
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
   </>
 }
