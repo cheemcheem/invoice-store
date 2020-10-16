@@ -6,6 +6,8 @@ import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import {Skeleton} from "@material-ui/lab";
 import GoogleButton from 'react-google-button'
 import {LoggedInContext} from "../../utils/Providers";
+import ListItemLink from "../common/appBar/ListItemLink";
+import InfoIcon from "@material-ui/icons/Info";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -21,8 +23,20 @@ const useStyles = makeStyles((theme: Theme) =>
       title: {
         flexGrow: 1,
       },
+      group: {
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+
+      },
+      groupInner: {
+        height: (window.innerHeight - theme.spacing(10))/2,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end"
+      },
       paper: {
-        marginTop: -theme.spacing(16)
+        height: "auto",
       },
       main: {
         flexGrow: 1,
@@ -55,13 +69,23 @@ export default function Login() {
           justify="center"
           alignContent="center"
           alignItems="center">
-      <Paper className={classes.paper}>
-        {(loggedIn === false)
-            ? <GoogleButton onClick={logInAndRefresh}
-                            className={classes.button}>Log in with Google (OAuth2)</GoogleButton>
-            : <Skeleton className={classes.button} variant="rect" animation="wave"/>
-        }
-      </Paper>
+      <div className={classes.group}>
+        <div className={classes.groupInner}>
+          <Paper className={classes.paper}>
+            {(loggedIn === false)
+                ? <GoogleButton onClick={logInAndRefresh}
+                                className={classes.button}>Log in with Google
+                  (OAuth2)</GoogleButton>
+                : <Skeleton className={classes.button} variant="rect" animation="wave"/>
+            }
+          </Paper>
+        </div>
+        <div className={classes.groupInner}>
+          <Paper className={classes.paper}>
+            <ListItemLink to="/privacy" primary="Privacy Policy" icon={<InfoIcon/>} nonList/>
+          </Paper>
+        </div>
+      </div>
     </Grid>
   </div>;
 }
