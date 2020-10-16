@@ -2,6 +2,11 @@
 
 See it live at [invoice.cheem.uk](https://invoice.cheem.uk)
 
+### Usage
+1. Run `./mvnw clean package`.
+2. Run `java -jar target/invoice-store.jar`.
+3. See [Profiles](#profiles) below for more information about running.
+
 ### What this aims to be
 An invoice manager. This was created to solve a problem of mine, it can be used to upload documents or photographs, as well as the totals of invoices. You can then download the individual files or a csv file with all of your invoices.
 
@@ -14,34 +19,6 @@ An invoice manager. This was created to solve a problem of mine, it can be used 
   <img src="/screenshots/all.png?raw=true"       height="275" alt="Screenshot of all invoices page."/>
 </div>
 
-### Usage
-1. Run `./mvnw clean package`
-2. Have the following environmental variables available:
-    - `JPA_URL` URL of PostgreSQL Instance
-    - `JPA_DB` Database to connect to in the PostgreSQL instance
-    - `JPA_USERNAME` Database username
-    - `JPA_PASSWORD` Database password
-    - `DB_MAX_POOL_SIZE` Hikari pool size for database connections
-    - `GOOGLE_CLIENT_ID` OAuth2 Google Client ID
-    - `GOOGLE_CLIENT_SECRET` OAuth2 Google Secret
-    - `AWS_ACCESS_KEY_ID` AWS Access Key ID
-    - `AWS_SECRET_ACCESS_KEY` AWS Secret Access Key
-    - `AWS_ENDPOINT` AWS S3 Endpoint
-    - `AWS_S3_BUCKET` AWS S3 Bucket Name
-    - `AWS_REGION` AWS Region
-    - `AWS_S3_BUCKET_ROOT` Key to use as prefix for files stored in S3 Bucket
-    - `AWS_MAX_FILE_LIMIT` Maximum number of files each user can store
-    - `DB_MAX_USER_LIMIT` Maximum number of users that can be registered
-    - `SPRING.PROFILES.ACTIVE` Comma separated list of below
-        - `prod` for PostgreSQL connection
-        - `dev` for H2 in memory database
-        - `oauth` enables OAuth2 support
-        - `create` will force create the required database schema on the database
-        - `debug`enables debug output
-        - `debug-spring`enables debug output for spring
-        - `debug-all` enables debug output on root logger
-    - `SERVER_PORT` Port to run application on
-3. Run `java -jar target/invoice-store.jar`
 
 ### Next steps
 I hope to add:
@@ -50,9 +27,19 @@ I hope to add:
 3. Exporting filtered data to a CSV.
 
 ### Profiles
-1. dev (default) - connects to in memory h2 db and in memory s3 bucket
-2. prod - connects to remote postgresql db and remote s3 bucket
-3. remote (default) - no workaround
-4. local - workaround for :3000 and :8080 port issues
-5. no-auth (default) - no password authentication
-6. oauth2 - oauth2 authentication
+A list of features, and profiles that can be used to modify them.
+
+| Feature        | Default State (no profile)                                       | Modified State (with profile)                                                          |
+| :------------- | :--------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| Storage        | Connects to an in-memory S3 Bucket and an in-memory H2 database. | Use `prod` profile to enable connecting to an external AWS S3 Bucket / PostgresQL DB.   |
+| Authentication | No authentication.                                               | Use `oauth2` profile to enable OAuth2 authentication using Google.                      |
+| Live React     | No adaptations.                                                  | Use `live` profile to enable compatibility with React Scripts running on separate port. |
+
+### Environmental Variables
+A list of profiles, and their required environmental variables.
+
+| Profile  | Environmental Variables |
+| :------- | :---------------------- |
+| `prod`   | <ul><li>`JPA_URL` URL of PostgreSQL Instance</li><li>`JPA_DB` Database to connect to in the PostgreSQL instance</li><li>`JPA_USERNAME` Database username</li><li>`JPA_PASSWORD` Database password</li><li>`AWS_ACCESS_KEY_ID` AWS Access Key ID</li><li>`AWS_SECRET_ACCESS_KEY` AWS Secret Access Key</li><li>`AWS_ENDPOINT` AWS S3 Endpoint</li><li>`AWS_S3_BUCKET` AWS S3 Bucket Name</li><li>`AWS_REGION` AWS Region</li><li>`AWS_S3_BUCKET_ROOT` Key to use as prefix for files stored in S3 Bucket</li><li>`AWS_MAX_FILE_LIMIT` Maximum number of files each user can store</li><li>`DB_MAX_POOL_SIZE` Hikari pool size for database connections</li><li>`DB_MAX_USER_LIMIT` Maximum number of users that can be registered</li></ul> |
+| `oauth2` | <ul><li>`GOOGLE_CLIENT_ID` OAuth2 Google Client ID</li><li>`GOOGLE_CLIENT_SECRET` OAuth2 Google Secret</li></ul> |
+| other    | <ul><li>`SPRING.PROFILES.ACTIVE` Comma separated list of any of `prod`, `oauth2`, `live`.</li><li>`SERVER_PORT` Port to run application on</li></ul>

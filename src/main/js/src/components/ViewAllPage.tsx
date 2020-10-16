@@ -1,5 +1,6 @@
 import Page from "./common/Page";
 import React, {useCallback, useMemo} from "react";
+import {useEffect} from "react";
 import ViewAll from "./viewAll/ViewAll";
 import AppBarMoreButton from "./common/AppBarMoreButton";
 import useRedirect from "../hooks/useRedirect";
@@ -10,7 +11,6 @@ import GetAppIcon from '@material-ui/icons/GetApp';
 import {useQuery} from "@apollo/client";
 import {BasicInvoice} from "../utils/Types";
 import {GET_ALL_INVOICES} from "../utils/Queries";
-import {useEffect} from "react";
 
 export type ViewAllPageProps = { archived?: boolean };
 export default function ViewAllPage({archived = false}: ViewAllPageProps) {
@@ -74,7 +74,21 @@ export default function ViewAllPage({archived = false}: ViewAllPageProps) {
 
   return <Page title={title} buttons={buttons}>
     <ViewAll archived={archived}
-             allInvoices={data?.user?.invoices.filter(i => i.archived === archived) ?? []}
+             allInvoices={data?.user?.invoices.filter(i => i.archived === archived).sort((a, b) => {
+               if (a.date < b.date) {
+                 return 1;
+               }
+               if (a.date > b.date) {
+                 return -1;
+               }
+               if (a.name > b.name) {
+                 return 1;
+               }
+               if (a.name < b.name) {
+                 return -1;
+               }
+               return 0;
+             }) ?? []}
              loading={loading || (error !== undefined)}/>
     {component}
   </Page>;

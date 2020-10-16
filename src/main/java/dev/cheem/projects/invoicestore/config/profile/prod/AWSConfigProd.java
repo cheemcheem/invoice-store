@@ -1,4 +1,4 @@
-package dev.cheem.projects.invoicestore.config.profile.oauth2;
+package dev.cheem.projects.invoicestore.config.profile.prod;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 @Setter
 @Configuration("awsConfig")
 @Slf4j
-public class AWSConfigOAuth2 {
+public class AWSConfigProd {
 
   @Value("${AWS_S3_BUCKET}")
   private String awsS3BucketProperty;

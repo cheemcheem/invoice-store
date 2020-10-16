@@ -4,6 +4,7 @@ import {useContext} from "react";
 import * as Cookie from "js-cookie";
 import useRedirect from "../../hooks/useRedirect";
 import {LoggedInContext} from "../../utils/Providers";
+import {ApolloError} from "@apollo/client";
 
 export default function Logout() {
   const {enqueueSnackbar} = useSnackbar();
@@ -19,10 +20,14 @@ export default function Logout() {
     })
     .then(refetch)
     .then(() => redirectIfRendered("/login"))
-    .catch(() => {
-      enqueueSnackbar("Failed to log out.", {variant: "error"});
-      redirectIfRendered("/all");
-      return refetch();
+    .catch((e) => {
+      if (e instanceof ApolloError) {
+        redirectIfRendered("/login");
+      } else {
+        enqueueSnackbar("Failed to log out.", {variant: "error"});
+        redirectIfRendered("/all");
+        return refetch();
+      }
     });
     return () => {
       rendered = false

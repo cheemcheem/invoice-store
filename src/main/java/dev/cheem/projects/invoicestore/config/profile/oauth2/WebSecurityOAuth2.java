@@ -29,12 +29,12 @@ public class WebSecurityOAuth2 extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
 
-    var local = List.of(environment.getActiveProfiles()).contains("local");
+    var live = List.of(environment.getActiveProfiles()).contains("live");
 
-    LogoutSuccessHandler logoutSuccessHandler = local
+    LogoutSuccessHandler logoutSuccessHandler = live
         ? this::handleLocalSuccess
         : this::handleRemoteSuccess;
-    AuthenticationSuccessHandler authenticationSuccessHandler = local
+    AuthenticationSuccessHandler authenticationSuccessHandler = live
         ? this::handleLocalSuccess
         : this::handleRemoteSuccess;
 

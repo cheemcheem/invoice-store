@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.util.SocketUtils;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -17,7 +18,7 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 @Slf4j
 public class AWSConfig {
 
-  private static final int PORT = 8001;
+  private static final int PORT = SocketUtils.findAvailableTcpPort();
   private static final String TEST_ENDPOINT = "http://localhost:" + PORT;
   private static final String TEST_BUCKET = "bucket";
   private static final String TEST_REGION = "test_region";

@@ -18,10 +18,16 @@ public class UserSetup implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
+    log.debug("Setting up fake user.");
+    if (userRepository.existsById(1L)) {
+      log.debug("Fake user already exists.");
+      return;
+    }
     var user = new User();
     user.setOAuth2Id("Fake OAuth2 ID");
     user.setUserId(1L);
     userRepository.save(user);
+    log.debug("Finished setting up fake user '{}'.", user);
   }
 
 }
