@@ -75,6 +75,7 @@
       <groupId>io.findify</groupId>
       <artifactId>s3mock_2.13</artifactId>
       <version>${s3mock.2.13.version}</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 

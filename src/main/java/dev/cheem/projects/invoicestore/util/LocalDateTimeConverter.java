@@ -1,6 +1,7 @@
 package dev.cheem.projects.invoicestore.util;
 
 import dev.cheem.projects.invoicestore.exception.InvalidDateException;
+import dev.cheem.projects.invoicestore.exception.InvoiceStoreException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,7 +19,7 @@ public class LocalDateTimeConverter {
     try {
       return new SimpleDateFormat(ISO_PATTERN).parse(value);
     } catch (ParseException e) {
-      throw new RuntimeException(InvalidDateException.wrongFormat(value, ISO_PATTERN));
+      throw InvalidDateException.wrongFormat(value, ISO_PATTERN);
     }
   }
 }

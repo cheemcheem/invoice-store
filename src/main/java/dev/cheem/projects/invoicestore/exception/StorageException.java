@@ -1,6 +1,6 @@
 package dev.cheem.projects.invoicestore.exception;
 
-public class StorageException extends RuntimeException {
+public class StorageException extends InvoiceStoreException {
 
   public StorageException() {
   }

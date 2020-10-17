@@ -1,6 +1,6 @@
 package dev.cheem.projects.invoicestore.exception;
 
-public class GraphQLMappingException extends RuntimeException {
+public class GraphQLMappingException extends InvoiceStoreException {
 
   public GraphQLMappingException() {
     super();

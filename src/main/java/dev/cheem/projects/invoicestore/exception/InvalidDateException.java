@@ -2,7 +2,7 @@ package dev.cheem.projects.invoicestore.exception;
 
 import java.time.LocalDateTime;
 
-public class InvalidDateException extends Exception {
+public class InvalidDateException extends InvoiceStoreException {
 
   private InvalidDateException(String message) {
     super(message);
