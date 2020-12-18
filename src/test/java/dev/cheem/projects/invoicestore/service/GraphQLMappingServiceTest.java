@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import dev.cheem.projects.invoicestore.dto.graphql.GraphQLInvoiceDTO;
+import dev.cheem.projects.invoicestore.dto.graphql.GraphQLInvoiceFileDTO;
 import dev.cheem.projects.invoicestore.dto.graphql.GraphQLUserDTO;
 import dev.cheem.projects.invoicestore.exception.GraphQLMappingException;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
@@ -329,7 +330,7 @@ class GraphQLMappingServiceTest {
 
   }
 
-  @SuppressWarnings("MagicConstant")
+  @SuppressWarnings({"MagicConstant", "ConstantConditions"})
   @Nested
   class MapInvoiceInputFields {
 
@@ -451,6 +452,7 @@ class GraphQLMappingServiceTest {
 
   }
 
+  @SuppressWarnings("ConstantConditions")
   @Nested
   class MapUserFields {
 
@@ -605,11 +607,11 @@ class GraphQLMappingServiceTest {
       var userIdSupplier = (Supplier<Long>) null;
 
       // when map user fields called
-      var mapUserFields = graphQLMappingService
-          .mapUserFields(userIdSupplier, nameSupplier, pictureSupplier, fields);
+      var mapUserFields = (Executable) () -> graphQLMappingService
+          .mapUserFields(userIdSupplier, nameSupplier, pictureSupplier, fields).get();
 
       // then throws null pointer exception
-      assertThrows(NullPointerException.class, mapUserFields::get);
+      assertThrows(NullPointerException.class, mapUserFields);
 
     }
 
@@ -620,11 +622,11 @@ class GraphQLMappingServiceTest {
       var nameSupplier = (Supplier<String>) null;
 
       // when map user fields called
-      var mapUserFields = graphQLMappingService
-          .mapUserFields(userIdSupplier, nameSupplier, pictureSupplier, fields);
+      var mapUserFields = (Executable) () -> graphQLMappingService
+          .mapUserFields(userIdSupplier, nameSupplier, pictureSupplier, fields).get();
 
       // then throws null pointer exception
-      assertThrows(NullPointerException.class, mapUserFields::get);
+      assertThrows(NullPointerException.class, mapUserFields);
     }
 
     @Test
@@ -634,11 +636,11 @@ class GraphQLMappingServiceTest {
       var pictureSupplier = (Supplier<String>) null;
 
       // when map user fields called
-      var mapUserFields = graphQLMappingService
-          .mapUserFields(userIdSupplier, nameSupplier, pictureSupplier, fields);
+      var mapUserFields = (Executable) () -> graphQLMappingService
+          .mapUserFields(userIdSupplier, nameSupplier, pictureSupplier, fields).get();
 
       // then throws null pointer exception
-      assertThrows(NullPointerException.class, mapUserFields::get);
+      assertThrows(NullPointerException.class, mapUserFields);
     }
 
     @Test
@@ -647,13 +649,165 @@ class GraphQLMappingServiceTest {
       var fields = (Set<String>) null;
 
       // when map user fields called
-      var mapUserFields = graphQLMappingService
-          .mapUserFields(userIdSupplier, nameSupplier, pictureSupplier, fields);
+      var mapUserFields = (Executable) () -> graphQLMappingService
+          .mapUserFields(userIdSupplier, nameSupplier, pictureSupplier, fields).get();
 
       // then throws null pointer exception
-      assertThrows(NullPointerException.class, mapUserFields::get);
+      assertThrows(NullPointerException.class, mapUserFields);
     }
 
   }
+
+  @Nested
+  class MapFileFields {
+
+    @Mock
+    private Supplier<String> nameSupplier;
+    @Mock
+    private Supplier<String> typeSupplier;
+
+    private String name;
+    private String type;
+
+    @BeforeEach
+    public void setUp() {
+      // set up mocks
+      initMocks(nameSupplier);
+      initMocks(typeSupplier);
+
+      // set up values for mocks when needed
+      name = "name";
+      type = "type";
+    }
+
+    @Test
+    public void givenValidSuppliersAndAllFields_whenMapFileFieldsCalled_thenCreatesValidDTO() {
+      // given valid suppliers and fields
+      var fields = Set.of("name", "type");
+      when(nameSupplier.get()).thenReturn(name);
+      when(typeSupplier.get()).thenReturn(type);
+
+      // when map file fields called
+      var mapFileFields = graphQLMappingService
+          .mapFileFields(fields, nameSupplier, typeSupplier).get();
+
+      // then creates valid DTO
+      var expected = new GraphQLInvoiceFileDTO();
+      expected.setName(name);
+      expected.setType(type);
+      assertEquals(expected, mapFileFields);
+    }
+
+    @Test
+    public void givenInvalidFields_whenMapFileFieldsCalled_thenThrowsGraphQLMappingException() {
+      // given invalid fields
+      var fields = Set.of("invalidField");
+
+      // when map file fields called
+      var mapFileFields = graphQLMappingService
+          .mapFileFields(fields, nameSupplier, typeSupplier);
+
+      // then throws graph ql mapping exception
+      assertThrows(GraphQLMappingException.class, mapFileFields::get);
+    }
+
+    @Test
+    public void givenNoFields_whenMapFileFieldsCalled_thenCreatesEmptyDTO() {
+      // given valid suppliers and no fields
+      var fields = new HashSet<String>();
+
+      // when map file fields called
+      var mapFileFields = graphQLMappingService
+          .mapFileFields(fields, nameSupplier, typeSupplier).get();
+
+      // then creates empty DTO
+      var expected = new GraphQLInvoiceFileDTO();
+      assertEquals(expected, mapFileFields);
+    }
+
+    @Test
+    public void givenNameField_whenMapFileFieldsCalled_thenCreatesDTOWithName() {
+      // given valid suppliers and name field
+      var fields = Set.of("name");
+      when(nameSupplier.get()).thenReturn(name);
+
+      // when map file fields called
+      var mapFileFields = graphQLMappingService
+          .mapFileFields(fields, nameSupplier, typeSupplier).get();
+
+      // then creates valid DTO with name
+      var expected = new GraphQLInvoiceFileDTO();
+      expected.setName(name);
+      assertEquals(expected, mapFileFields);
+    }
+
+    @Test
+    public void givenTypeField_whenMapFileFieldsCalled_thenCreatesDTOWithType() {
+      // given valid suppliers and picture field
+      var fields = Set.of("type");
+      when(typeSupplier.get()).thenReturn(type);
+
+      // when map file fields called
+      var mapFileFields = graphQLMappingService
+          .mapFileFields(fields, nameSupplier, typeSupplier).get();
+
+      // then creates valid DTO with type
+      var expected = new GraphQLInvoiceFileDTO();
+      expected.setType(type);
+      assertEquals(expected, mapFileFields);
+    }
+
+    @Test
+    public void givenNullNameSupplier_whenMapFileFieldsCalled_thenThrowsNullPointerException() {
+      // given null name supplier
+      var fields = new HashSet<String>();
+      var nameSupplier = (Supplier<String>) null;
+
+      // when map file fields called
+      var mapFileFields = (Executable) () -> graphQLMappingService
+          .mapFileFields(fields, nameSupplier, typeSupplier).get();
+
+      // then throws null pointer exception
+      assertThrows(NullPointerException.class, mapFileFields);
+    }
+
+    @Test
+    public void givenNullTypeSupplier_whenMapFileFieldsCalled_thenThrowsNullPointerException() {
+      // given null type supplier
+      var fields = new HashSet<String>();
+      var typeSupplier = (Supplier<String>) null;
+
+      // when map file fields called
+      var mapFileFields = (Executable) () -> graphQLMappingService
+          .mapFileFields(fields, nameSupplier, typeSupplier).get();
+
+      // then throws null pointer exception
+      assertThrows(NullPointerException.class, mapFileFields);
+    }
+
+    @Test
+    public void givenNullFields_whenMapFileFieldsCalled_thenThrowsNullPointerException() {
+      // given null fields
+      var fields = (Set<String>) null;
+
+      // when map file fields called
+      var mapFileFields = (Executable) () -> graphQLMappingService
+          .mapFileFields(fields, nameSupplier, typeSupplier).get();
+
+      // then throws null pointer exception
+      assertThrows(NullPointerException.class, mapFileFields);
+    }
+  }
+
+  @Nested
+  class MapUpdateInputFields {
+
+  }
+
+  @Nested
+  class UpdateInvoice {
+
+  }
+
 
 }
