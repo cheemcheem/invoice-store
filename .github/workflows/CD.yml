@@ -142,11 +142,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Upload Target Folder
-        uses: actions/upload-artifact@master
-        with:
-          name: maven package
-          path: target/
+      - name: Update SHA
+        run: echo $GITHUB_SHA > $GITHUB_WORKSPACE/target/_meta
+
+      - name: Build container image
+        run: docker build -t ${{secrets.DOCKER_REGISTRY}}:$(echo $GITHUB_SHA | head -c7) .
 
   deploy:
     name: Deploy
@@ -154,24 +154,6 @@ jobs:
     # if: ${{(github.ref == 'refs/heads/develop') || (github.ref == 'refs/heads/hotfix')}}
     runs-on: ubuntu-latest
     steps:
-      - name: Download Target Folder
-        uses: actions/download-artifact@master
-        with:
-          name: maven package
-          path: target/
-          
-      - name: Upload Dockerfile
-        uses: actions/download-artifact@master
-        with:
-          name: dockerfile
-          path: ./Dockerfile    
-      
-      - name: Update SHA
-        run: echo $GITHUB_SHA > $GITHUB_WORKSPACE/target/_meta
-
-      - name: Build container image
-        run: docker build -t ${{secrets.DOCKER_REGISTRY}}:$(echo $GITHUB_SHA | head -c7) .
-      
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
