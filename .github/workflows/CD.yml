@@ -148,12 +148,6 @@ jobs:
       - name: Build container image
         run: docker build -t ${{secrets.DOCKER_REGISTRY}}:$(echo $GITHUB_SHA | head -c7) .
 
-  deploy:
-    name: Deploy
-    needs: package
-    # if: ${{(github.ref == 'refs/heads/develop') || (github.ref == 'refs/heads/hotfix')}}
-    runs-on: ubuntu-latest
-    steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -164,6 +158,17 @@ jobs:
 
       - name: Push image to DigitalOcean Container Registry
         run: docker push ${{secrets.DOCKER_REGISTRY}}:$(echo $GITHUB_SHA | head -c7)
+        
+  deploy:
+    name: Deploy
+    needs: package
+    # if: ${{(github.ref == 'refs/heads/develop') || (github.ref == 'refs/heads/hotfix')}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{secrets.DIGITALOCEAN_ACCESS_TOKEN}}
 
       - name: Update deployment file with new image
         run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|${{secrets.DOCKER_REGISTRY}}:'${TAG}'|' $GITHUB_WORKSPACE/config/deployment.yaml
