@@ -180,7 +180,7 @@ jobs:
         run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|${{secrets.DOCKER_REGISTRY}}:'${TAG}'|' $GITHUB_WORKSPACE/config/deployment.yaml
 
       - name: Update deployment file with secret name
-        run: sed -i 's|<SECRET_NAME>|${{secrets.DOCKER_REGISTRY}}:'${{secrets.KUBERNETES_SECRET_NAME}}'|' $GITHUB_WORKSPACE/config/deployment.yaml
+        run: sed -i 's|<SECRET_NAME>|${{secrets.KUBERNETES_SECRET_NAME}}|' $GITHUB_WORKSPACE/config/deployment.yaml
 
       - name: Save DigitalOcean kubeconfig with short-lived credentials
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{secrets.KUBERNETES_CONTEXT}}
