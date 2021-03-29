@@ -17,6 +17,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      
       - name: Start NPM Cache
         uses: actions/cache@v2
         with:
@@ -25,6 +26,7 @@ jobs:
           restore-keys: |
             ${{runner.os}}-npm-${{hashFiles('**/package-lock.json')}}
             ${{runner.os}}-npm-
+      
       - name: Start Maven Cache
         uses: actions/cache@v2
         with:
@@ -33,14 +35,17 @@ jobs:
           restore-keys: |
             ${{runner.os}}-m2-${{ hashFiles('**/pom.xml') }}
             ${{runner.os}}-m2-
+      
       - name: Set up JDK 13
         uses: actions/setup-java@v1
         with:
           java-version: 13
+      
       - name: Compile with Maven
         run: ./mvnw -B clean compile -DskipTests --file pom.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Upload Target Folder
         uses: actions/upload-artifact@master
         with:
@@ -54,6 +59,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      
       - name: Start NPM Cache
         uses: actions/cache@v2
         with:
@@ -62,6 +68,7 @@ jobs:
           restore-keys: |
             ${{runner.os}}-npm-${{hashFiles('**/package-lock.json')}}
             ${{runner.os}}-npm-
+      
       - name: Start Maven Cache
         uses: actions/cache@v2
         with:
@@ -70,15 +77,18 @@ jobs:
           restore-keys: |
             ${{runner.os}}-m2-${{ hashFiles('**/pom.xml') }}
             ${{runner.os}}-m2-
+      
       - name: Set up JDK 13
         uses: actions/setup-java@v1
         with:
           java-version: 13
+      
       - name: Download Target Folder
         uses: actions/download-artifact@master
         with:
           name: maven compile
           path: target/
+      
       - name: Test with Maven
         run: ./mvnw -B test --file pom.xml
         env:
@@ -91,6 +101,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      
       - name: Start NPM Cache
         uses: actions/cache@v2
         with:
@@ -99,6 +110,7 @@ jobs:
           restore-keys: |
             ${{runner.os}}-npm-${{hashFiles('**/package-lock.json')}}
             ${{runner.os}}-npm-
+      
       - name: Start Maven Cache
         uses: actions/cache@v2
         with:
@@ -107,19 +119,23 @@ jobs:
           restore-keys: |
             ${{runner.os}}-m2-${{ hashFiles('**/pom.xml') }}
             ${{runner.os}}-m2-
+      
       - name: Set up JDK 13
         uses: actions/setup-java@v1
         with:
           java-version: 13
+      
       - name: Download Target Folder
         uses: actions/download-artifact@master
         with:
           name: maven compile
           path: target/
+    
       - name: Build with Maven
         run: ./mvnw -B package -DskipTests --file pom.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Upload Target Folder
         uses: actions/upload-artifact@master
         with:
@@ -137,18 +153,35 @@ jobs:
         with:
           name: maven package
           path: target/
-      - name: Prepare SSH Key and Artefact
-        run: 'echo "$SSH_KEY" > key && /bin/chmod 700 key && /bin/chmod 700 target && /bin/chmod 700 target/invoice-store.jar'
-        shell: bash
-        env:
-          SSH_KEY: ${{secrets.KEY}}
-      - name: Upload Project to Dev Server
-        run: /usr/bin/scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i key target/invoice-store.jar ${{secrets.REMOTE}}:${{secrets.PATH}}
-      - name: Deploy Project on Dev Server
-        run: /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i key ${{secrets.REMOTE}} ${{secrets.RESTART_SERVICE}}
-#        TODO find way around IFTTT 10 Applet limit, possibly combine these into one Applet
-#      - name: Alert IFTTT
-#        uses: distributhor/workflow-webhook@v1
-#        env:
-#          webhook_url: ${{secrets.IFTTT_URL}}
-#          webhook_secret: ${{secrets.IFTTT_SECRET}}
+      
+      - name: Update SHA
+        run: echo $GITHUB_SHA > $GITHUB_WORKSPACE/src/_meta
+
+      - name: Build container image
+        run: docker build -t ${{secrets.DOCKER_REGISTRY}}:$(echo $GITHUB_SHA | head -c7) .
+      
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{secrets.DIGITALOCEAN_ACCESS_TOKEN}}
+
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Push image to DigitalOcean Container Registry
+        run: docker push ${{secrets.DOCKER_REGISTRY}}:$(echo $GITHUB_SHA | head -c7)
+
+      - name: Update deployment file with new image
+        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|${{secrets.DOCKER_REGISTRY}}:'${TAG}'|' $GITHUB_WORKSPACE/config/deployment.yaml
+
+      - name: Update deployment file with secret name
+        run: sed -i 's|<SECRET_NAME>|${{secrets.DOCKER_REGISTRY}}:'${{secrets.KUBERNETES_SECRET_NAME}}'|' $GITHUB_WORKSPACE/config/deployment.yaml
+
+      - name: Save DigitalOcean kubeconfig with short-lived credentials
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{secrets.KUBERNETES_CONTEXT}}
+
+      - name: Deploy to DigitalOcean Kubernetes
+        run: kubectl apply -f $GITHUB_WORKSPACE/config/deployment.yaml
+
+      - name: Verify deployment
+        run: kubectl rollout status deployment invoice-store-deployment
