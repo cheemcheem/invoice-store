@@ -155,7 +155,7 @@ jobs:
           path: target/
       
       - name: Update SHA
-        run: echo $GITHUB_SHA > $GITHUB_WORKSPACE/src/_meta
+        run: echo $GITHUB_SHA > $GITHUB_WORKSPACE/target/_meta
 
       - name: Build container image
         run: docker build -t ${{secrets.DOCKER_REGISTRY}}:$(echo $GITHUB_SHA | head -c7) .
