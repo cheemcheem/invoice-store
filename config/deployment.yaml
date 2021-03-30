@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoice-store-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoice-store
+  template:
+    metadata:
+      labels:
+        app: invoice-store
+    spec:
+      containers:
+      - image: <IMAGE>
+        name: invoice-store-container
+        ports:
+        - containerPort: 8080
+        env:
+        - name: JPA_URL
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_JPA_URL
+        - name: JPA_DB
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_JPA_DB
+        - name: JPA_USERNAME
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_JPA_USERNAME
+        - name: JPA_PASSWORD
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_JPA_PASSWORD
+        - name: GOOGLE_CLIENT_ID
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_GOOGLE_CLIENT_ID
+        - name: GOOGLE_CLIENT_SECRET
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_GOOGLE_CLIENT_SECRET
+        - name: DB_MAX_POOL_SIZE
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_DB_MAX_POOL_SIZE
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_AWS_SECRET_ACCESS_KEY
+        - name: AWS_ENDPOINT
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_AWS_ENDPOINT
+        - name: AWS_S3_BUCKET
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_AWS_S3_BUCKET
+        - name: AWS_REGION
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_AWS_REGION
+        - name: AWS_S3_BUCKET_ROOT
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_AWS_S3_BUCKET_ROOT
+        - name: AWS_MAX_FILE_LIMIT
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_AWS_MAX_FILE_LIMIT
+        - name: DB_MAX_USER_LIMIT
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_DB_MAX_USER_LIMIT
+        - name: spring_profiles_active
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_spring_profiles_active
+        - name: SERVER_PORT
+          valueFrom: 
+            secretKeyRef: 
+              name: <SECRET_NAME>
+              key: INVOICE_STORE_SERVER_PORT  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: invoice-store-service
+spec:
+  selector:
+     app: invoice-store
+  type: ClusterIP
+  ports:
+    - name: invoice-store-port
+      port: 8080
