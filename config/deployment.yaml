@@ -13,10 +13,17 @@ spec:
         app: invoice-store
     spec:
       containers:
-      - image: <IMAGE>
+      - image: cheemcheem/invoice-store:<TAG>
         name: invoice-store-container
         ports:
         - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          failureThreshold: 1
+          periodSeconds: 10
         env:
         - name: JPA_URL
           valueFrom: 
@@ -94,15 +101,9 @@ spec:
               name: <SECRET_NAME>
               key: INVOICE_STORE_DB_MAX_USER_LIMIT
         - name: spring_profiles_active
-          valueFrom: 
-            secretKeyRef: 
-              name: <SECRET_NAME>
-              key: INVOICE_STORE_spring_profiles_active
+          value: prod,oauth2
         - name: SERVER_PORT
-          valueFrom: 
-            secretKeyRef: 
-              name: <SECRET_NAME>
-              key: INVOICE_STORE_SERVER_PORT  
+          value: "8080"
 ---
 apiVersion: v1
 kind: Service
