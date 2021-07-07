@@ -2,13 +2,13 @@ package dev.cheem.projects.invoicestore.service;
 
 import dev.cheem.projects.invoicestore.model.AWSInstance;
 import dev.cheem.projects.invoicestore.model.DatabaseInstance;
-import dev.cheem.projects.invoicestore.dto.UserDTO;
 import dev.cheem.projects.invoicestore.model.InvoiceDetails;
 import dev.cheem.projects.invoicestore.model.User;
 import dev.cheem.projects.invoicestore.repository.UserRepository;
 import java.util.Objects;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
@@ -24,20 +24,18 @@ public class UserService {
   private final UserRepository userRepository;
 
   @Transactional
-  public UserDTO login(String name) {
+  public User login(@NonNull String name) {
     var oAuthUser = new User();
     log.info("Principal name {}.", name);
     oAuthUser.setOAuth2Id(name);
 
     var optionalUser = userRepository.findOne(Example.of(oAuthUser));
 
-    var user = optionalUser.orElseGet(() -> userRepository.save(oAuthUser));
-
-    return UserDTO.builder().userId(user.getUserId().toString()).build();
+    return optionalUser.orElseGet(() -> userRepository.save(oAuthUser));
   }
 
   @Transactional
-  public Optional<Long> checkUser(Long userId) {
+  public Optional<Long> checkUser(@NonNull Long userId) {
     log.info("UserService.getUser");
     log.debug("userId = " + userId);
     var user = userRepository.findById(userId);
@@ -50,16 +48,15 @@ public class UserService {
   }
 
   @Transactional
-  public User getUser(Long userId) {
+  public User getUser(@NonNull Long userId) {
     log.info("UserService.getUser");
     log.debug("userId = " + userId);
     var user = userRepository.findById(userId);
     return user.orElseThrow();
   }
 
-
   @Transactional
-  public boolean detailsMatch(Long userId, String invoiceDetailsId) {
+  public boolean detailsMatch(@NonNull Long userId, @NonNull String invoiceDetailsId) {
     return userRepository.getOne(userId)
         .getInvoiceDetailsSet().stream()
         .map(InvoiceDetails::getInvoiceDetailsId)
@@ -67,7 +64,7 @@ public class UserService {
         .anyMatch(invoiceDetailsId::equals);
   }
 
-  public boolean allowedMoreFiles(Long userId) {
+  public boolean allowedMoreFiles(@NonNull Long userId) {
     return userRepository.getOne(userId)
         .getInvoiceDetailsSet().stream()
         .map(InvoiceDetails::getInvoiceDetailsId)

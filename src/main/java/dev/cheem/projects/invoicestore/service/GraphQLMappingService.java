@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GraphQLMappingService {
 
-  public Function<InvoiceDetails, GraphQLInvoiceDTO> mapInvoiceFields(Set<String> fields) {
+  public Function<InvoiceDetails, GraphQLInvoiceDTO> mapInvoiceFields(@NonNull Set<String> fields) {
     return invoiceDetails -> {
       log.debug("GraphQLMappingService.mapInvoiceFields");
       var graphQLInvoiceDTO = new GraphQLInvoiceDTO();
@@ -64,7 +65,7 @@ public class GraphQLMappingService {
   }
 
   public Function<Map<String, Object>, InvoiceDetails> mapInvoiceInputFields(
-      Supplier<User> user
+      @NonNull Supplier<User> user
   ) {
     return invoiceInput -> {
       log.debug("GraphQLMappingService.mapInvoiceInputFields");
@@ -84,10 +85,10 @@ public class GraphQLMappingService {
 
 
   public Supplier<GraphQLUserDTO> mapUserFields(
-      Supplier<Long> userId,
-      Supplier<String> name,
-      Supplier<String> picture,
-      Set<String> fields
+      @NonNull Supplier<Long> userId,
+      @NonNull Supplier<String> name,
+      @NonNull Supplier<String> picture,
+      @NonNull Set<String> fields
   ) {
     return () -> {
       log.debug("GraphQLMappingService.mapUserFields");
@@ -116,9 +117,9 @@ public class GraphQLMappingService {
   }
 
   public Supplier<GraphQLInvoiceFileDTO> mapFileFields(
-      Set<String> fields,
-      Supplier<String> name,
-      Supplier<String> type
+      @NonNull Set<String> fields,
+      @NonNull Supplier<String> name,
+      @NonNull Supplier<String> type
   ) {
     return () -> {
       log.debug("GraphQLMappingService.mapFileFields");

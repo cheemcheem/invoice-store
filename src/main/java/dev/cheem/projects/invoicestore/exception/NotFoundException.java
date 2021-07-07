@@ -1,6 +1,6 @@
 package dev.cheem.projects.invoicestore.exception;
 
-public class NotFoundException extends RuntimeException {
+public class NotFoundException extends InvoiceStoreException {
 
   public NotFoundException() {
     super();
