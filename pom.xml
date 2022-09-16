@@ -91,7 +91,7 @@
   </dependencyManagement>
 
   <properties>
-    <graphql-java.version>15.0</graphql-java.version>
+    <graphql-java.version>17.4</graphql-java.version>
     <graphql-java-spring.version>2.0</graphql-java-spring.version>
     <github.username>cheemcheem</github.username>
     <aws.java.sdk.version>2.14.21</aws.java.sdk.version>
